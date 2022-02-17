@@ -30,21 +30,22 @@ class Analyze(abc.ABC):
         Args:
             analysis_request: Object with all required inputs to run analysis.
         """
+        self.analysis_request = analysis_request
 
         self.db_session = DBConfig.get_session()
+
+        self.dssat_path = config.get_dssat_path()
+
 
 
 def get_analyze_object(analysis_request: DSSAT_AnalysisRequest, session=None):
     """Returns the configured Analyze object based on engine name"""
-    if not session:
-        session = DBConfig.get_session()
 
     engine_script = config.get_analysis_engine_script('dssat')
     kls = config.get_analyze_class(engine_script)
     return kls(analysis_request, engine_script=engine_script)
 
 
-#here is where the json file comes in?
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description="Process input data to feed into analytical engine")
@@ -52,11 +53,14 @@ if __name__ == "__main__":
     parser.add_argument("--request_file", help="File path for analysis request")
 
     args = parser.parse_args()
-    request_file ='/Users/thiagoferreira53/Desktop/EBS_templates/new.JSON'
+
+    request_file ='/Users/thiagoferreira53/Desktop/EBS_templates/new.JSON' #temporary for testing
+
     if path.exists(request_file):
         with open(request_file) as f:
             try:
                 analysis_request: DSSAT_AnalysisRequest = DSSAT_AnalysisRequest(**json.load(f))
+                #print(analysis_request)
             except ValidationError as e:
                 raise InvalidAnalysisRequest(str(e))
     else:

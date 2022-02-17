@@ -135,8 +135,7 @@ def run_dssat_simulation(path, path_dssat_exe):
 
 
 
-    subprocess.call([path_dssat_exe+'dscsm048', 'B',
-                     'BatchFile.v48'])
+    subprocess.call([path_dssat_exe, 'B', 'BatchFile.v48'])
 
 def get_simulation_predictions(job_id: int, prediction_result_file_path: str):
 

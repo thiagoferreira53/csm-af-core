@@ -10,6 +10,15 @@ from pipeline.dpo import ProcessData
 
 class DSSATProcessData(ProcessData):
 
+    def __init__(self, analysis_request):
+        super().__init__(analysis_request)
+        print(self.analysis_request)
+
+    def __get_job_name(self):
+        # TODO: put this in ProcessData
+        return f"{self.analysis_request.requestId}"
+
+
     def execute_simulation(self, job_id, start_date, end_date, latitude, longitude, path, IR, path_dssat):
         path_JSON_file = self.__create_files_from_input(job_id, start_date, end_date, latitude, longitude, path, IR)
 
@@ -174,7 +183,7 @@ class DSSATProcessData(ProcessData):
 
 path_test = '/Users/thiagoferreira53/Desktop/EBS_templates/'
 folder_path = '/Users/thiagoferreira53/Desktop/EBS_templates/'
-path_dssat_exe = '/Users/thiagoferreira53/Projects/dssat-csm-os-48/build/bin/'
+path_dssat_exe = '/Users/thiagoferreira53/Projects/dssat-csm-os-48/build/bin/dscsm048'
 # testing
 s = '2009/12/31'
 e = '2010/01/10'
