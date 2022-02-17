@@ -24,5 +24,7 @@ class DSSAT_AnalysisRequest(BaseModel):
     IrrType: str
     CultivarID: str
     Cultivar: str
-    workdir: str
+    outputFolder: str
+    latitude : str
+    longitude : str
 

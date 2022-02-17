@@ -6,29 +6,37 @@ import glob
 
 from pipeline.dssat.services import get_weather_data, run_dssat_simulation, get_crop_data
 from pipeline.dpo import ProcessData
+from pipeline import config
 
 
 class DSSATProcessData(ProcessData):
 
     def __init__(self, analysis_request):
         super().__init__(analysis_request)
-        print(self.analysis_request)
 
     def __get_job_name(self):
         # TODO: put this in ProcessData
         return f"{self.analysis_request.requestId}"
 
 
-    def execute_simulation(self, job_id, start_date, end_date, latitude, longitude, path, IR, path_dssat):
-        path_JSON_file = self.__create_files_from_input(job_id, start_date, end_date, latitude, longitude, path, IR)
+    def execute_simulation(self):
+
+        job_folder = self.get_job_folder(self.__get_job_name())
+
+        start_date = self.analysis_request.startDate
+        end_date = self.analysis_request.endDate
+        latitude = self.analysis_request.latitude
+        longitude = self.analysis_request.longitude
+        IR = self.analysis_request.IrrType
+        path_dssat = config.DSSAT_P
+
+        path_JSON_file = self.__create_files_from_input(start_date, end_date, latitude, longitude, job_folder, IR)
 
         self.__read_meta(path_JSON_file)
 
-        self.__write_bash_DSSAT(path)
+        self.__write_bash_DSSAT(job_folder)
 
-        run_dssat_simulation(path, path_dssat)
-
-        #get_simulation_predictions()
+        run_dssat_simulation(job_folder, path_dssat)
 
     def __read_meta(self, path) -> dict:
         with open(path, 'r') as j:
@@ -41,10 +49,12 @@ class DSSATProcessData(ProcessData):
             else:
                 self.__read_input_DSSAT_custom(obj)
 
-    def __create_files_from_input(self, job_id, start_date, end_date, latitude, longitude, path, IR):
+    def __create_files_from_input(self, start_date, end_date, latitude, longitude, path, IR):
 
-        get_weather_data(self.db_session, job_id, start_date, end_date, latitude, longitude, path)
-        path_json = get_crop_data(self.db_session, job_id, start_date, end_date, latitude, longitude, path, IR)
+        job_id = self.__get_job_name()
+
+        get_weather_data(self.db_session, start_date, end_date, latitude, longitude, path)
+        path_json = get_crop_data(self.db_session, start_date, end_date, latitude, longitude, path, IR)
         return path_json
 
     def __read_input_DSSAT_standard(self, obj, path_json) -> dict:
@@ -74,7 +84,7 @@ class DSSATProcessData(ProcessData):
         sd = datetime.strptime(startDate, '%Y/%m/%d')
         ed = datetime.strptime(endDate, '%Y/%m/%d')
 
-        tmpl = open('/Users/thiagoferreira53/Desktop/EBS_templates/whTemplate.SNX', 'r')
+        tmpl = open(config.TEMPLATES_FOLDER+'/whTemplate.SNX', 'r')
         fileX = tmpl.read()
         fileX = re.sub("ssssssssss", str(soil_id), fileX)
         fileX = re.sub("ppppS", "{:>5}".format(str(startDOY)), fileX)
@@ -175,22 +185,7 @@ class DSSATProcessData(ProcessData):
             DSSATbatch.write("%-93s %5s %6s %6s %6s %6s\n" % ("./" + names, 1, 1, 0, 0, 0))
 
 
-    def run(self, job_id, start_date, end_date, latitude, longitude, path, IR, path_dssat):
+    def run(self):
         """Preprocess input data for DSSAT Crop Modeling Simulations"""
-        return [self.execute_simulation(job_id, start_date, end_date, latitude, longitude, path, IR, path_dssat)]
-
-
-
-path_test = '/Users/thiagoferreira53/Desktop/EBS_templates/'
-folder_path = '/Users/thiagoferreira53/Desktop/EBS_templates/'
-path_dssat_exe = '/Users/thiagoferreira53/Projects/dssat-csm-os-48/build/bin/dscsm048'
-# testing
-s = '2009/12/31'
-e = '2010/01/10'
-lat = 14.75
-long = 18.75
-IR_val = True
-
-abc = DSSATProcessData(ProcessData)
-abc.run(1, s, e, lat, long, path_test, IR_val, path_dssat_exe)
+        return [self.execute_simulation()]
 

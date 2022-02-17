@@ -21,15 +21,18 @@ from pipeline.exceptions import InvalidAnalysisRequest
 class ProcessData(ABC):
     """Abstract class for ProcessData objects"""
 
-    def __init__(self, analysis_request, *args, **kwargs):
+    def __init__(self, analysis_request: DSSAT_AnalysisRequest, *args, **kwargs):
         """Constructor.
 
         Args:
             analysis_request: Object with all required inputs to run analysis.
         """
-        self.db_session = DBConfig.get_session()
 
         self.analysis_request = analysis_request
+
+        self.db_session = DBConfig.get_session()
+
+        self.output_folder = analysis_request.outputFolder
 
 
     def get_job_folder(self, job_name: str) -> str:
@@ -41,7 +44,6 @@ class ProcessData(ABC):
             os.makedirs(pathlib.Path(job_folder))
 
         return job_folder
-
 
 
     @abstractmethod
@@ -57,17 +59,13 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    request_file ='/Users/thiagoferreira53/Desktop/EBS_templates/new.JSON' #temporary for testing
-
-    if path.exists(request_file):
-        with open(request_file) as f:
+    if path.exists(args.request_file):
+        with open(args.request_file) as f:
             try:
                 analysis_request: DSSAT_AnalysisRequest = DSSAT_AnalysisRequest(**json.load(f))
-                print(analysis_request)
             except ValidationError as e:
                 raise InvalidAnalysisRequest(str(e))
     else:
-        raise InvalidAnalysisRequest(f"Request file {request_file} not found")
-
+        raise InvalidAnalysisRequest(f"Request file {args.request_file} not found")
 
     ProcessData(analysis_request).run()

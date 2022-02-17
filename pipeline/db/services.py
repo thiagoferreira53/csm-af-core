@@ -90,25 +90,3 @@ def get_nitrogen_app_rainfed_value(dbsession, latitude: float, longitude: float)
     mega_env_id = (dbsession.query(nitrogen_app_rainfed.rast.ST_Value(wkt_element)))
     return mega_env_id
 
-#testing
-#s ='2009/12/31'
-#e = '2010/01/10'
-#lat = 14.75
-#long = 18.75
-
-
-#result = get_daily_weather_data(s,e, lat, long) #weather file
-#result = get_mega_env_id(lat, long) #ME
-#result = get_soil_id(lat, long) #soil
-#result = get_carbon_value(lat, long) #carbon
-#result = get_soil_water_value(lat, long) #soil water content
-#result = get_init_residue_mass_value(lat, long) #no val
-#result = get_init_root_mass_value(lat, long) #no val
-#result = get_soil_nitrogen_value(lat, long)
-#result = get_plating_date_winter_wheat(lat, long)
-#result = get_plating_date_spring_wheat(lat, long)
-#result = get_nitrogen_app_irrigated_value(lat, long)
-#result = get_nitrogen_app_rainfed_value(lat, long)
-
-#for i in result:
-#    print(i)

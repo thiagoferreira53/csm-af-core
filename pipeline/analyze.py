@@ -36,12 +36,29 @@ class Analyze(abc.ABC):
 
         self.dssat_path = config.get_dssat_path()
 
+    def get_process_data(self, analysis_request, *args, **kwargs):
+        """Get the associated ProcessData object for this Analyze"""
+        return self.dpo_cls(analysis_request)
+
+    def pre_process(self):
+        job_input_files = self.get_process_data(self.analysis_request).run()
+        return job_input_files
+
+    def get_engine_script(self):
+        return self.engine_script
+
 
 
 def get_analyze_object(analysis_request: DSSAT_AnalysisRequest, session=None):
     """Returns the configured Analyze object based on engine name"""
+    #if not session:
+    #    session = DBConfig.get_session()
 
-    engine_script = config.get_analysis_engine_script('dssat')
+    #analysis_engine_meta = db_services.get_analysis_config_meta_data(
+    #    session, analysis_request.analysisConfigPropertyId, "engine")
+    #engine_script = config.get_analysis_engine_script(analysis_engine_meta.value)
+    engine_script = config.get_analysis_engine_script('dssat')  #temporary for testing
+
     kls = config.get_analyze_class(engine_script)
     return kls(analysis_request, engine_script=engine_script)
 
@@ -54,16 +71,13 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    request_file ='/Users/thiagoferreira53/Desktop/EBS_templates/new.JSON' #temporary for testing
-
-    if path.exists(request_file):
-        with open(request_file) as f:
+    if path.exists(args.request_file):
+        with open(args.request_file) as f:
             try:
                 analysis_request: DSSAT_AnalysisRequest = DSSAT_AnalysisRequest(**json.load(f))
-                #print(analysis_request)
             except ValidationError as e:
                 raise InvalidAnalysisRequest(str(e))
     else:
-        raise InvalidAnalysisRequest(f"Request file {request_file} not found")
+        raise InvalidAnalysisRequest(f"Request file {args.request_file} not found")
 
     sys.exit(get_analyze_object(analysis_request).run())

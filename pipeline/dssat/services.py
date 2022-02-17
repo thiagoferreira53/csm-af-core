@@ -12,15 +12,18 @@ import subprocess
 import glob
 
 
-def get_weather_data(dbsession, job_id: int, start_date: str, end_date: str, latitude: float, longitude: float, path: str):
+def get_weather_data(dbsession, start_date: str, end_date: str, latitude: float, longitude: float, path: str):
     """
     Creates a weather file (.WHT) for DSSAT crop growth simulations
     """
     df = get_daily_weather_info(dbsession, start_date, end_date, latitude, longitude)
     #print(type(df), df.count())
+
+    weather_file_output = path + '/' + str(latitude) + '_' + str(longitude) + '.WTH'
+
     for r in range(df.count()):
-        if not os.path.exists(path + str(latitude) + '_' + str(longitude) + '.WTH'):
-            weather = open(path + str(latitude) + '_' + str(longitude) + '.WTH', 'w')
+        if not os.path.exists(weather_file_output):
+            weather = open(weather_file_output, 'w')
             write_WTH = csv.writer(weather, delimiter=' ')
             weather.write("%s %7s %7s \n" % ('@INSI', 'LAT', 'LONG'))
             weather.write("%5s %7s %7s \n" % ('XXXX', latitude, longitude))
@@ -40,7 +43,7 @@ ME_List = {'CultivarID': ['IB0008','IB0009','IB0011','IB0012','IB0015','IB0017',
 MegaEnvironments = pd.DataFrame(ME_List, columns = ['CultivarID', 'Cultivar'])
 
 
-def get_crop_data(dbsession, job_id: int, start_date: str, end_date: str, latitude: float, longitude: float, path: str, IR: bool):
+def get_crop_data(dbsession, start_date: str, end_date: str, latitude: float, longitude: float, path: str, IR: bool):
     """
     Creates a experiment file (FileX) for DSSAT crop growth simulations
     """
@@ -79,7 +82,7 @@ def get_crop_data(dbsession, job_id: int, start_date: str, end_date: str, latitu
 
     tmplName = "DSSAT_Standard.tmpl"
 
-    fileTmpl = path + tmplName
+    fileTmpl = path + '/' + tmplName
 
     tmpl = open(fileTmpl, 'r')
 
@@ -101,7 +104,7 @@ def get_crop_data(dbsession, job_id: int, start_date: str, end_date: str, latitu
     DSSATjson = re.sub("\[INIT_RES\]", str(init_residue), DSSATjson)
     DSSATjson = re.sub("\[ROOT_WT\]", str(init_root), DSSATjson)
     DSSATjson = re.sub("\[INIT_NITRO\]", str(nitr), DSSATjson)
-    if IR == "TRUE":
+    if IR == "I":
         DSSATjson = re.sub("\[NITRO\]", str(nitr_irr), DSSATjson)
         DSSATjson = re.sub("\[IRR_TYPE\]", "A", DSSATjson)
     else:
@@ -111,7 +114,7 @@ def get_crop_data(dbsession, job_id: int, start_date: str, end_date: str, latitu
     DSSATjson = re.sub("\[CULT_NAME\]", Cultivar, DSSATjson)
     DSSATjson = re.sub("\[DSSAT_WORKDIR\]", path, DSSATjson)
 
-    DSSATjsonPath = path + str(job_id) + "test.JSON"   #rename
+    DSSATjsonPath = path + "/test.JSON"   #rename
     DSSATjsonFile = open(DSSATjsonPath, 'w')
     DSSATjsonFile.write(DSSATjson)
     DSSATjsonFile.close()

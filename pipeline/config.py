@@ -1,14 +1,15 @@
-#move this file to the root of this folder (af/pipeline)
-
-
 import os
 
 #I must set this environment variable inside the docker-compose.yml
 os.environ['AFDB_URL'] = 'postgresql://postgres:weather@localhost:5432/weather_data'
 os.environ['DSSAT_PATH'] = '/Users/thiagoferreira53/Projects/dssat-csm-os-48/build/bin/dscsm048'
+os.environ['TEMPLATES_FOLDER'] = '/Users/thiagoferreira53/Desktop/EBS_templates'
+#
+
 
 AFDB_URI = os.getenv("AFDB_URL")
-
+DSSAT_P = os.getenv('DSSAT_PATH')
+TEMPLATES_FOLDER = os.getenv('TEMPLATES_FOLDER')
 
 UNIVERSAL_UNKNOWN = "NA"
 
@@ -40,7 +41,7 @@ def get_analysis_engine_script(engine_name: str):
 
 def get_analyze_class(engine_name):
     """Gets the configured analyze class"""
-    #
+
     kls = ANALYZE_IMPLEMENTATIONS.get(engine_name.lower())
     parts = kls.split(".")
     module = ".".join(parts[:-1])
