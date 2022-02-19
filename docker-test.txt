@@ -1,0 +1,33 @@
+version: "3.4"
+volumes:
+  afdb_volume:
+  af_data_volume:
+
+services:
+  rabbitmq:
+    hostname: rabbitmq
+    image: rabbitmq:3.8-management
+    environment:
+      - RABBITMQ_DEFAULT_USER=admin
+      - RABBITMQ_DEFAULT_PASS=mypass
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+  worker:
+    build:
+      context: ./af_task_orchestrator
+      dockerfile: Dockerfile
+    working_dir: /app
+    volumes:
+      - af_data_volume:/data/
+    environment:
+      - C_FORCE_ROOT=true
+      - BROKER=amqp://admin:mypass@rabbitmq:5672
+      - BACKEND=rpc://
+      - BA_DATA_DIR=/data/
+      - DSSAT_SEATS=${DSSAT_SEATS}
+    links:
+      - rabbitmq
+    depends_on:
+      - rabbitmq

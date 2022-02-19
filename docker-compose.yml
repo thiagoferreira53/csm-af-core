@@ -1,0 +1,15 @@
+version: "3.4"
+volumes:
+  afdb_volume:
+  af_data_volume:
+
+services:
+  rabbitmq:
+    hostname: rabbitmq
+    image: rabbitmq:3.8-management
+    environment:
+      - RABBITMQ_DEFAULT_USER=admin
+      - RABBITMQ_DEFAULT_PASS=mypass
+    ports:
+      - "5672:5672"
+      - "15672:15672"
