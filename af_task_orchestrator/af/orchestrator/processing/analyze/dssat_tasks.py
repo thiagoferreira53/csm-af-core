@@ -1,14 +1,6 @@
 from af_task_orchestrator.af.orchestrator.app import app
 from af_task_orchestrator.af.orchestrator.base import StatusReportingTask
 from af_task_orchestrator.af.pipeline import analyze as pipeline_analyze
-from jobs_api.api import app
-
-print("ENTROU AQUI")
-
-@app.task(name='dsssat_tasks.test')
-def test(name):
-
-    return name
 
 
 @app.task(name="run_dssat_analyze", base=StatusReportingTask, queue="DSSAT")

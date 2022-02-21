@@ -178,3 +178,34 @@ class Task(BaseMixin, Base):
     request_id = Column(Integer, ForeignKey("af-core.request.id"))
     parent_id = Column(Integer)
 
+class Analysis(BaseMixin, Base):
+
+    __tablename__ = "analysis"
+
+    name = Column(String)
+    description = Column(String)
+    request_id = Column(Integer, ForeignKey(Request.id))
+    prediction_id = Column(Integer)
+    status = Column(String)
+    tenant_id = Column(Integer)
+    model_id = Column(Integer)
+
+    request = relationship(Request, back_populates="analyses")
+
+    jobs = relationship("Job", back_populates="analysis")
+
+
+class Job(BaseMixin, Base):
+
+    __tablename__ = "job"
+
+    analysis_id = Column(Integer, ForeignKey(Analysis.id))
+    name = Column(String)
+    time_start = Column(DateTime)
+    time_end = Column(DateTime)
+    output_path = Column(String)
+    status = Column(String)
+    status_message = Column(String)
+    tenant_id = Column(Integer)
+
+    analysis = relationship(Analysis, back_populates="jobs")

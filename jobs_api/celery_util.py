@@ -5,7 +5,7 @@ from celery import Celery
 CELERY_APP = None
 
 
-os.environ['BROKER'] = 'amqp://admin:mypass@rabbitmq:5672'
+os.environ['BROKER'] = 'amqp://admin:mypass@localhost:5672' #temporary for testing - later change localhost to rabbitmq
 
 
 def get_celery_app():  # pragma: no cover

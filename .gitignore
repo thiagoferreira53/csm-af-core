@@ -1,0 +1,31 @@
+# Ignore files
+# *.tar.gz
+*.swp
+*.swo
+*.dt
+*.as
+*.tmp
+*.tbl
+*.conf
+*.out
+*.LOG
+*.DS_Store
+*.pyc
+*.err
+.Rhistory
+*.sif
+.coverage
+.env
+
+# Ignore folders
+__pycache__/
+scratch/
+aeo/output/
+aeo/input/
+aeo/scratch/
+venv
+ipython-venv
+venv-dev
+docs/notebooks/.ipynb*
+.vscode
+htmlcov/

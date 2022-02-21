@@ -5,7 +5,6 @@ from af_task_orchestrator.af.pipeline import analyze as pipeline_analyze
 from af_task_orchestrator.af.pipeline.analysis_request import DSSAT_AnalysisRequest
 
 
-
 @app.task(name="analyze", base=StatusReportingTask)
 def analyze(request_id: str, request_params):
     """Analyze taks run the analysis engine for given task request parameters.
@@ -42,7 +41,7 @@ def pre_process(request_id, analysis_request):
     if engine == "asreml":
         app.send_task("run_asreml_analyze", args=args, queue="ASREML")
     if engine == "dssat":
-        app.send_task("run_asreml_analyze", args=args, queue="DSSAT")
+        app.send_task("run_dssat_analyze", args=args, queue="DSSAT")
     if engine == "sommer":
         app.send_task("run_sommer_analyze", args=args)
 

@@ -14,6 +14,27 @@ services:
       - "5672:5672"
       - "15672:15672"
 
+  api:
+    build:
+      context: ./af-jobs-api
+      dockerfile: Dockerfile
+    working_dir: /app
+    volumes:
+      - af_data_volume:/data/
+    environment:
+      - C_FORCE_ROOT=true
+      - BROKER=amqp://admin:mypass@rabbitmq:5672
+      - AFDB_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@database:5432/afdb
+      - AFAPI_ALLOWABLE_ORIGINS=*
+      - BA_DATA_DIR=/data/
+    restart: always
+    ports:
+      - "5000:5000"
+    depends_on:
+      - rabbitmq
+      - database
+
+
   worker:
     build:
       context: ./af_task_orchestrator

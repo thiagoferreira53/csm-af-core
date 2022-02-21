@@ -7,8 +7,7 @@ from kombu import Exchange, Queue
 jsonpickle_pandas.register_handlers()
 # register('json', jsonpickle.dumps, jsonpickle.loads, content_type='application/json')
 
-# BROKER = os.getenv("BROKER")
-# BACKEND = os.getenv("BACKEND")
+
 LOGGER = get_task_logger(__name__)
 
 # INSTALLED_TASKS = ["af-core.orchestrator.processing.analyze", "af-core.orchestrator.processing.asreml"]

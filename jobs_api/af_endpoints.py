@@ -2,21 +2,25 @@ import json
 import pathlib
 import uuid as uuidlib
 
-import jobs_api.celery_util
+import celery_util
 from flask import jsonify, render_template, request
 from flask.blueprints import Blueprint
 
 
-print('ABCCC')
-
 af_apis = Blueprint("af", __name__, url_prefix="/v1")
+
+
+@af_apis.route("/t/<name>", methods=["GET"])
+def get_name(name):
+    # todo read from AFDB
+    return name
+
 
 # TODO: this will be replaced by the AFDB connector instead of being held in memory
 global analysis_type
 analysis_type = [
     {"name": "DSSAT Simulation", "id": str(uuidlib.uuid4())}
 ]
-
 
 @af_apis.route("/analysis-type", methods=["GET"])
 def get_analysis_type():
@@ -52,6 +56,7 @@ def get_data_source():
 
 @af_apis.route("/test", methods=["GET"])
 def test():
+    print('entrou em test')
     return render_template("loginExample.html")
 
 
@@ -60,12 +65,13 @@ def testredirect():
     return render_template("loginExample.html")
 
 
-@af_apis.route("/test/asreml", methods=["POST"])
-def testasreml():
+@af_apis.route("/test/dssat", methods=["POST"])
+def testdssat():
     content = request.json
+    print(content)
     # req = Request(uuid=str(uuidlib.uuid4()))
     # db.session.add(req)
     # db.session.commit()
     # content["requestId"] = req.uuid
-    jobs_api.celery_util.send_task(process_name="run_dssat", args=(content,), queue="DSSAT", routing_key="DSSAT")
+    celery_util.send_task(process_name="run_dssat", args=(content,), queue="DSSAT", routing_key="DSSAT")
     return "", 200
