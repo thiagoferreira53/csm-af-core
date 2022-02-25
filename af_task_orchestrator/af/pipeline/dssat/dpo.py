@@ -185,6 +185,22 @@ class DSSATProcessData(ProcessData):
             DSSATbatch.write("%-93s %5s %6s %6s %6s %6s\n" % ("./" + names, 1, 1, 0, 0, 0))
 
 
+    def __get_summary_out(self):
+        job_folder = self.get_job_folder(self.__get_job_name())
+
+        summary_file = job_folder + 'Summary.OUT'
+
+        import pandas as pd
+        df = pd.read_csv(summary_file, skiprows=3, sep=r"\s+", index_col=False, engine='python')
+
+        # funky way to get rid of @ from header
+        cols = df.columns[1:]
+        df = df.drop('EPCP', 1)
+        df.columns = cols
+
+        return df
+
+
     def run(self):
         """Preprocess input data for DSSAT Crop Modeling Simulations"""
         return [self.execute_simulation()]

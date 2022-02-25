@@ -72,6 +72,12 @@ def testdssat():
     # req = Request(uuid=str(uuidlib.uuid4()))
     # db.session.add(req)
     # db.session.commit()
-    # content["requestId"] = req.uuid
     celery_util.send_task(process_name="run_dssat", args=(content,), queue="DSSAT", routing_key="DSSAT")
-    return "", 200
+    return jsonify({"status": "ok", "id": 1})
+
+@af_apis.route("/test/dssat", methods=["GET"])
+def get_simulation_summary():
+
+    celery_util.send_task(process_name="get_summary", args=(), queue="DSSAT", routing_key="DSSAT")
+    return "ok", 200
+

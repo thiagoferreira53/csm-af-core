@@ -23,5 +23,13 @@ def run_dssat(params: dict):
     analyze_object = pipeline_analyze.get_analyze_object(analysis_request)
     input_files = analyze_object.pre_process()
 
-    return json_response(params, HTTPStatus.CREATED)
+
+@app.task(name="get_summary", queue="DSSAT")  # , base=StatusReportingTask)
+def get_summary():
+    """params is a dict that should contain the following:
+
+    requestId:  the request uuid
+    """
+    analyze_object = pipeline_analyze.get_analyze_object()
+
 

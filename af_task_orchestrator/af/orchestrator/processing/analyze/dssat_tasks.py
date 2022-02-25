@@ -18,3 +18,4 @@ def run_dssat_analyze(request_id, analysis_request, input_files, results):
     else:
         args = request_id, analysis_request, input_files, results
         app.send_task("run_dssat_analyze", args=args, queue="DSSAT")
+
