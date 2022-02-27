@@ -13,6 +13,8 @@ from pydantic import ValidationError
 from af_task_orchestrator.af.pipeline.db.core import DBConfig
 from af_task_orchestrator.af.pipeline.analysis_request import DSSAT_AnalysisRequest
 from af_task_orchestrator.af.pipeline.exceptions import InvalidAnalysisRequest
+from af_task_orchestrator.af.pipeline import config
+
 
 class ProcessData(ABC):
     """Abstract class for ProcessData objects"""
@@ -28,8 +30,7 @@ class ProcessData(ABC):
 
         self.db_session = DBConfig.get_session()
 
-        self.output_folder = analysis_request.outputFolder
-
+        self.output_folder = config.OUT_DIR
 
     def get_job_folder(self, job_name: str) -> str:
 

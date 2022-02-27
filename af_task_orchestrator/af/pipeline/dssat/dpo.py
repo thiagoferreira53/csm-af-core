@@ -21,90 +21,74 @@ class DSSATProcessData(ProcessData):
 
     def execute_simulation(self):
 
-        job_folder = self.get_job_folder(self.__get_job_name())
+        self.job_folder = self.get_job_folder(self.__get_job_name())
 
-        start_date = self.analysis_request.startDate
-        end_date = self.analysis_request.endDate
+        crop = self.analysis_request.crop
         latitude = self.analysis_request.latitude
         longitude = self.analysis_request.longitude
+        start_date = self.analysis_request.startDate
+        end_date = self.analysis_request.endDate
         IR = self.analysis_request.IrrType
         path_dssat = config.DSSAT_P
 
-        path_JSON_file = self.__create_files_from_input(start_date, end_date, latitude, longitude, job_folder, IR)
+        soil_id_num, startDate, endDate, startDOY, startDOYSim, FertDOY, endDOY, carbon, soil_water, Iresidue, \
+        Iroot, Initro, NitroFert, IrrType, CultivarID, Cultivar = \
+            self.__postgis_crop_data(start_date, end_date, latitude, longitude, self.job_folder, IR, crop)
 
-        self.__read_meta(path_JSON_file)
+        self.__read_input_DSSAT_standard(soil_id_num, startDate, endDate, startDOY, startDOYSim, FertDOY, endDOY,
+                                         carbon, soil_water, Iresidue, Iroot, Initro, NitroFert, IrrType, CultivarID,
+                                         Cultivar)
 
-        self.__write_bash_DSSAT(job_folder)
+        self.__write_bash_DSSAT(self.job_folder)
 
-        run_dssat_simulation(job_folder, path_dssat)
+        run_dssat_simulation(self.job_folder, path_dssat)
 
-    def __read_meta(self, path) -> dict:
-        with open(path, 'r') as j:
-            request = j.read()
 
-            obj = json.loads(request)
-
-            if obj["metadata"]["requestCategory"] == "Standard_Data":
-                self.__read_input_DSSAT_standard(obj, path)
-            else:
-                self.__read_input_DSSAT_custom(obj)
-
-    def __create_files_from_input(self, start_date, end_date, latitude, longitude, path, IR):
-
-        job_id = self.__get_job_name()
+    def __postgis_crop_data(self, start_date, end_date, latitude, longitude, path, IR, crop):
 
         get_weather_data(self.db_session, start_date, end_date, latitude, longitude, path)
-        path_json = get_crop_data(self.db_session, start_date, end_date, latitude, longitude, path, IR)
-        return path_json
 
-    def __read_input_DSSAT_standard(self, obj, path_json) -> dict:
+        soil, start_date, end_date, startDOY, startDOYSim, FertDOY, endDOY, carbon, soil_water, init_residue, \
+            init_root, init_nitr, nitr_irr, nitr_rf, CultivarID, \
+            Cultivar = get_crop_data(self.db_session, start_date, end_date, latitude, longitude, path, IR, crop)
 
-        #extract path to the json file
-        path = os.path.split(path_json)[0]
+        return soil, start_date, end_date, startDOY, startDOYSim, FertDOY, endDOY, carbon, soil_water, init_residue, \
+           init_root, init_nitr, nitr_irr, nitr_rf, CultivarID, Cultivar
 
-        crop = obj["parameters"]["crop"]
-        soil_id_num = obj["parameters"]["soil"]
-        startDate = obj["parameters"]["startDate"]
-        endDate = obj["parameters"]["endDate"]
-        startDOY = obj["parameters"]["startDOY"]
-        startDOYSim = obj["parameters"]["startSim"]
-        FertDOY = obj["parameters"]["FertDOY"]
-        endDOY = obj["parameters"]["AendDOY"]
-        Iresidue = obj["parameters"]["iniRes"]
-        Iroot = obj["parameters"]["rootWt"]
-        Initro = obj["parameters"]["iniNitro"]
-        NitroFert = obj["parameters"]["NitroFert"]
-        IrrType = obj["parameters"]["Irrigation"]
-        CultivarID = obj["parameters"]["cultivarID"]
-        Cultivar = obj["parameters"]["cultivarName"]
-        workdir = obj["parameters"]["workdirectory"]
 
-        soil_id = "HN_GEN00" + str(soil_id_num).zfill(2)
+    def __read_input_DSSAT_standard(self, soil_id_num, startDate, endDate, startDOY, startDOYSim, FertDOY, endDOY,
+                                         carbon, soil_water, Iresidue, Iroot, Initro, NitroFert, IrrType, CultivarID,
+                                         Cultivar) -> dict:
 
-        sd = datetime.strptime(startDate, '%Y/%m/%d')
-        ed = datetime.strptime(endDate, '%Y/%m/%d')
+        crop = self.analysis_request.crop
 
-        tmpl = open(config.TEMPLATES_FOLDER + '/whTemplate.SNX', 'r')
-        fileX = tmpl.read()
-        fileX = re.sub("ssssssssss", str(soil_id), fileX)
-        fileX = re.sub("ppppS", "{:>5}".format(str(startDOY)), fileX)
-        fileX = re.sub("iiiiS", "{:>5}".format(str(startDOYSim)), fileX)
-        fileX = re.sub("ppppE", "{:>5}".format(str(endDOY)), fileX)
-        fileX = re.sub("rrrr", "{:>4}".format("2150"), fileX)
-        fileX = re.sub("wwww", "{:>4}".format("RRRR"), fileX)
-        fileX = re.sub("inres", "{:>5}".format(str(Iresidue)), fileX)
-        fileX = re.sub("rtwt", "{:>4}".format(str(Iroot)), fileX)
-        fileX = re.sub("nitro", "{:>5}".format(str(Initro)), fileX)
-        fileX = re.sub("fnn", "{:>5}".format("0"), fileX)
-        fileX = re.sub("nnnnn", "{:>5}".format(str(ed.year - sd.year)), fileX)
-        fileX = re.sub("Rco2p", "{:>5}".format("R 362"), fileX)
-        fileX = re.sub("CultID", "{:>6}".format(CultivarID), fileX)
-        fileX = re.sub("CultN", "{:<20}".format(Cultivar), fileX)
-        fileX = re.sub("fertD", "{:>5}".format(str(FertDOY)), fileX)
-        fileX = re.sub("scirm", "{:>5}".format(IrrType), fileX)
+        if(crop == 'wheat'):
+            soil_id = "HN_GEN00" + str(soil_id_num).zfill(2)
 
-        #models = ['CSCER', 'WHAPS', 'CSCRP']
-        models = ['CSCER', 'WHAPS']
+            sd = datetime.strptime(startDate, '%Y/%m/%d')
+            ed = datetime.strptime(endDate, '%Y/%m/%d')
+
+            tmpl = open(config.TEMPLATES_FOLDER + '/FileX_Template.FLX', 'r')
+            fileX = tmpl.read()
+            fileX = re.sub("ssssssssss", str(soil_id), fileX)
+            fileX = re.sub("ppppS", "{:>5}".format(str(startDOY)), fileX)
+            fileX = re.sub("iiiiS", "{:>5}".format(str(startDOYSim)), fileX)
+            fileX = re.sub("ppppE", "{:>5}".format(str(endDOY)), fileX)
+            fileX = re.sub("rrrr", "{:>4}".format("2150"), fileX)
+            fileX = re.sub("wwww", "{:>4}".format("RRRR"), fileX)
+            fileX = re.sub("inres", "{:>5}".format(str(Iresidue)), fileX)
+            fileX = re.sub("rtwt", "{:>4}".format(str(Iroot)), fileX)
+            fileX = re.sub("nitro", "{:>5}".format(str(Initro)), fileX)
+            fileX = re.sub("fnn", "{:>5}".format("0"), fileX)
+            fileX = re.sub("nnnnn", "{:>5}".format(str(ed.year - sd.year)), fileX)
+            fileX = re.sub("Rco2p", "{:>5}".format("R 362"), fileX)
+            fileX = re.sub("CultID", "{:>6}".format(CultivarID), fileX)
+            fileX = re.sub("CultN", "{:<20}".format(Cultivar), fileX)
+            fileX = re.sub("fertD", "{:>5}".format(str(FertDOY)), fileX)
+            fileX = re.sub("scirm", "{:>5}".format(IrrType), fileX)
+
+            #models = ['CSCER', 'WHAPS', 'CSCRP']
+            models = ['CSCER', 'WHAPS']
 
         count = 0
         for i in models:
@@ -123,7 +107,7 @@ class DSSATProcessData(ProcessData):
                 fileX_gen = re.sub("nit2", "{:>4}".format(str(int(NitroFert) - 80)), fileX_gen)
                 # fileX_gen = re.sub("nit3", "{:>5}".format(str((NitroFert - 80)/2)), fileX)
 
-            DSSATjsonFile = open(path + "/RRRR010" + str(count) + ".WHX", 'w')
+            DSSATjsonFile = open(self.job_folder + "/RRRR010" + str(count) + ".WHX", 'w')
             DSSATjsonFile.write(fileX_gen)
             DSSATjsonFile.close()
 

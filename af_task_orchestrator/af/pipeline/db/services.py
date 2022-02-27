@@ -1,5 +1,5 @@
 from af_task_orchestrator.af.pipeline.db.models import weather_rain, weather_tmax, weather_tmin, weather_srad
-from af_task_orchestrator.af.pipeline.db.models import mega_environments, soil, carbon, soil_water, init_residue_mass, init_root_mass, soil_nitrogen
+from af_task_orchestrator.af.pipeline.db.models import mega_environments_wheat, soil, carbon, soil_water, init_residue_mass, init_root_mass, soil_nitrogen
 from af_task_orchestrator.af.pipeline.db.models import plating_date_winter_wheat, plating_date_spring_wheat, nitrogen_app_irrigated, nitrogen_app_rainfed
 
 import datetime
@@ -29,11 +29,11 @@ def get_daily_weather_info(dbsession, start_date: str, end_date: str, latitude: 
     return weather
 
 
-def get_mega_env_id(dbsession, latitude: float, longitude: float):
+def get_mega_env_id_wheat(dbsession, latitude: float, longitude: float):
     wkt_element = coord_to_point(latitude,longitude)
 
-    mega_env_id = (dbsession.query(mega_environments.name)
-                   .filter(mega_environments.rast.ST_Value(wkt_element) == 1)) #selects only the first value
+    mega_env_id = (dbsession.query(mega_environments_wheat.name)
+                   .filter(mega_environments_wheat.rast.ST_Value(wkt_element) == 1)) #selects only the first value
     return mega_env_id
 
 

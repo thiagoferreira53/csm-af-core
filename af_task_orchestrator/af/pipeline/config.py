@@ -3,13 +3,16 @@ import os
 #I must set this environment variable inside the docker-compose.yml
 os.environ['AFDB_URL'] = 'postgresql://postgres:weather@localhost:5432/weather_data'
 os.environ['DSSAT_PATH'] = '/Users/thiagoferreira53/Projects/dssat-csm-os-48/build/bin/dscsm048'
-os.environ['TEMPLATES_FOLDER'] = '/Users/thiagoferreira53/Desktop/EBS_templates'
+os.environ['TEMPLATES_FOLDER'] = '/Users/thiagoferreira53/Desktop/EBS/DSSAT_templates'
+os.environ['OUT_DIR'] = '/Users/thiagoferreira53/Desktop/EBS/Output_folder' #?# create env variable later on docker
 #
 
 
 AFDB_URI = os.getenv("AFDB_URL")
 DSSAT_P = os.getenv('DSSAT_PATH')
 TEMPLATES_FOLDER = os.getenv('TEMPLATES_FOLDER')
+OUT_DIR = os.getenv("OUT_DIR")
+
 
 UNIVERSAL_UNKNOWN = "NA"
 

@@ -9,13 +9,6 @@ from sqlalchemy.orm import relationship
 
 from sqlalchemy import Column, Integer, String, Date
 
-# workaround to get pytest to work with sqlite
-if os.getenv("env") == "testing":
-    pass
-else:
-    pass
-
-
 class weather_rain(Base):
     __tablename__ = "historical_weather_rain"
 
@@ -112,8 +105,8 @@ class soil_nitrogen(Base):
     rast = Column(Raster)
     filename = Column(String)
 
-class mega_environments(Base):
-    __tablename__ = 'mega_env'
+class mega_environments_wheat(Base):
+    __tablename__ = 'mega_env' #?# must change the table name later on
     rid = Column(Integer, primary_key=True)
     name = Column(String)
     rast = Column(Raster)
