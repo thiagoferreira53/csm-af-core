@@ -185,10 +185,10 @@ class DSSATProcessData(ProcessData):
             DSSATbatch.write("%-93s %5s %6s %6s %6s %6s\n" % ("./" + names, 1, 1, 0, 0, 0))
 
 
-    def __get_summary_out(self):
+    def get_summary_out(self):
         job_folder = self.get_job_folder(self.__get_job_name())
 
-        summary_file = job_folder + 'Summary.OUT'
+        summary_file = job_folder + '/Summary.OUT'
 
         import pandas as pd
         df = pd.read_csv(summary_file, skiprows=3, sep=r"\s+", index_col=False, engine='python')
@@ -197,11 +197,16 @@ class DSSATProcessData(ProcessData):
         cols = df.columns[1:]
         df = df.drop('EPCP', 1)
         df.columns = cols
+        df.columns = df.columns.str.replace('.', '')
+        df.to_json(job_folder + '/summary_output.json')
 
-        return df
+        return df.to_json()
 
 
     def run(self):
         """Preprocess input data for DSSAT Crop Modeling Simulations"""
-        return [self.execute_simulation()]
+        if self.analysis_request.dataSource == 'DSSAT_Output':
+            return [self.get_summary_out()]
+        else:
+            return [self.execute_simulation()]
 

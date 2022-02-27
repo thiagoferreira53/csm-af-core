@@ -9,3 +9,4 @@ class DataType(Enum):
 
 class DataSource(str, Enum):
     DSSAT = "DSSAT"
+    OUTDSSAT= "DSSAT_Output"

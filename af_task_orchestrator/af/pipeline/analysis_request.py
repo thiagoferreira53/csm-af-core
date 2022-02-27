@@ -26,3 +26,9 @@ class DSSAT_AnalysisRequest(BaseModel):
     latitude : str
     longitude : str
 
+
+
+class DSSAT_results(BaseModel):
+    requestId: str
+    dataSource: DataSource
+    outputFolder: str

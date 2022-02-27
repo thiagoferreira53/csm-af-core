@@ -1,6 +1,7 @@
 import json
 import pathlib
 import uuid as uuidlib
+import pandas as pd
 
 import celery_util
 from flask import jsonify, render_template, request
@@ -69,7 +70,8 @@ def testredirect():
 def testdssat():
     content = request.json
     print(content)
-    # req = Request(uuid=str(uuidlib.uuid4()))
+    uuid=str(uuidlib.uuid4())
+    print(uuid)
     # db.session.add(req)
     # db.session.commit()
     celery_util.send_task(process_name="run_dssat", args=(content,), queue="DSSAT", routing_key="DSSAT")
@@ -77,7 +79,11 @@ def testdssat():
 
 @af_apis.route("/test/dssat", methods=["GET"])
 def get_simulation_summary():
+    content = request.json
+    out = content.get('outputFolder')
+    print('**** ' +out+'/1/summary_output.json')
+    celery_util.send_task(process_name="get_summary", args=(content,), queue="DSSAT", routing_key="DSSAT")
+    json_file = pd.read_json(out+'/1/summary_output.json')
 
-    celery_util.send_task(process_name="get_summary", args=(), queue="DSSAT", routing_key="DSSAT")
-    return "ok", 200
+    return json_file.to_json(indent=4)
 

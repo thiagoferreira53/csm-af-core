@@ -2,6 +2,7 @@ import pandas as pd
 from csv import reader
 import re
 from datetime import datetime
+import json
 path_folder = '/Users/thiagoferreira53/Downloads/Embrapa-Bangladesh/Pythia+GDM/triangulo-outputs/Feb_15/-18.00S/-043.00W/'
 
 
@@ -16,7 +17,12 @@ cols = df.columns[1:]
 df = df.drop('EPCP', 1)
 df.columns = cols
 
-print(df.HWAM)
+df_json = df.to_json('/Users/thiagoferreira53/Desktop/EBS_templates//1/summary_output.json', orient='records')
+
+a = pd.read_json('/Users/thiagoferreira53/Desktop/EBS_templates//1/summary_output.json')
+
+print(a)
+
 
 ##############
 #plantgro

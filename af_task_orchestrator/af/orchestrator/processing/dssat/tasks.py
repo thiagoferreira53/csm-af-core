@@ -2,9 +2,9 @@ from http import HTTPStatus
 
 from af_task_orchestrator.af.orchestrator import dssatutil
 from af_task_orchestrator.af.orchestrator.app import app
-from jobs_api.common.responses import json_response
+from jobs_api.common.responses import json_response, make_response
 from af_task_orchestrator.af.pipeline import analyze as pipeline_analyze
-from af_task_orchestrator.af.pipeline.analysis_request import DSSAT_AnalysisRequest
+from af_task_orchestrator.af.pipeline.analysis_request import DSSAT_AnalysisRequest, DSSAT_results
 
 # from af.orchestrator.base import StatusReportingTask
 
@@ -25,11 +25,16 @@ def run_dssat(params: dict):
 
 
 @app.task(name="get_summary", queue="DSSAT")  # , base=StatusReportingTask)
-def get_summary():
+def get_summary(params: dict):
     """params is a dict that should contain the following:
 
     requestId:  the request uuid
     """
-    analyze_object = pipeline_analyze.get_analyze_object()
+    analysis_request = DSSAT_results(**params)
 
 
+    analyze_object = pipeline_analyze.get_analyze_object(analysis_request)
+    input_files = analyze_object.pre_process()
+    print(input_files)
+
+    return input_files
