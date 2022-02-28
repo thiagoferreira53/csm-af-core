@@ -9,8 +9,17 @@ from af_request import models as db_models
 from database import db
 
 
-class RequestData(pydantic.BaseModel):
-    experiments: list[api_models.Experiment] = None
-    traits: list[api_models.Trait] = None
 
+def submit(request_params):
+    """Submits analysis request to pipeline."""
 
+    analysis_uuid = str(uuidlib.uuid4())
+
+    req = db_models.Request(
+        uuid=analysis_uuid,
+        institute=request_params.institute,
+        crop=request_params.crop,
+        type=request_params.analysisType,
+        requestor_id=request_params.requestorId,
+        status="PENDING",
+    )

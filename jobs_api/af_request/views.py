@@ -11,7 +11,7 @@ from flask import jsonify, make_response, request, send_from_directory
 from flask.blueprints import Blueprint
 from sqlalchemy.orm.exc import MultipleResultsFound, NoResultFound
 
-af_requests_bp = Blueprint("af_requests", __name__, url_prefix="/v1/requests")
+af_requests_bp = Blueprint("af_requests", __name__, url_prefix="/v1/csm/requests")
 
 
 @af_requests_bp.route("", methods=["POST"])

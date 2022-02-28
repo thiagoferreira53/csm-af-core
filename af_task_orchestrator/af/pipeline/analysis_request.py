@@ -7,10 +7,13 @@ class DSSAT_AnalysisRequest(BaseModel):
     requestId: str
     dataSource: DataSource
     dataType: DataType
-    latitude : str
-    longitude : str
+    dataSourceAccessToken: str
+    latitude : str #?#list[str]
+    longitude : str #list[str]
     startDate: str
     endDate: str
     crop: str
-    IrrType: str
+    IrrType: str #list[str]
+
+
 

@@ -1,6 +1,8 @@
-from af_task_orchestrator.af.pipeline.db.models import weather_rain, weather_tmax, weather_tmin, weather_srad
-from af_task_orchestrator.af.pipeline.db.models import mega_environments_wheat, soil, carbon, soil_water, init_residue_mass, init_root_mass, soil_nitrogen
-from af_task_orchestrator.af.pipeline.db.models import plating_date_winter_wheat, plating_date_spring_wheat, nitrogen_app_irrigated, nitrogen_app_rainfed
+from af_task_orchestrator.af.pipeline.db.models import Job, weather_rain, weather_tmax, weather_tmin, weather_srad
+from af_task_orchestrator.af.pipeline.db.models import mega_environments_wheat, soil, carbon, soil_water, \
+    init_residue_mass, init_root_mass, soil_nitrogen
+from af_task_orchestrator.af.pipeline.db.models import plating_date_winter_wheat, plating_date_spring_wheat, \
+    nitrogen_app_irrigated, nitrogen_app_rainfed
 
 import datetime
 from geoalchemy2.elements import WKTElement
@@ -90,3 +92,27 @@ def get_nitrogen_app_rainfed_value(dbsession, latitude: float, longitude: float)
     mega_env_id = (dbsession.query(nitrogen_app_rainfed.rast.ST_Value(wkt_element)))
     return mega_env_id
 
+
+#EBS
+
+def add(db_session, _object):
+    db_session.add(_object)
+    db_session.commit()
+    return _object
+
+
+def create_job(db_session, analysis_id: int, job_name: str, status: str, status_message: str) -> Job:
+
+    job_start_time = datetime.utcnow()
+    job = Job(
+        analysis_id=analysis_id,
+        name=job_name,
+        time_start=job_start_time,
+        creation_timestamp=job_start_time,
+        status=status,
+        status_message=status_message,
+    )
+
+    job = add(db_session, job)
+
+    return job
