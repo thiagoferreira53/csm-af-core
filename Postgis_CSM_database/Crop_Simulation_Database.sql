@@ -174,3 +174,31 @@ create trigger raster_data_ME
     for each row
     execute procedure raster_data_ME();
 
+-- 
+-- EBS request manager tables
+--
+
+
+CREATE TABLE request
+(
+	uuid TEXT NULL,
+	category TEXT NULL,
+	type TEXT NULL,
+	design TEXT NULL,
+	requestor_id TEXT NULL,
+	institute TEXT NULL,
+	crop TEXT NULL,
+	program TEXT NULL,
+	status TEXT NULL,
+    engine TEXT NULL,
+    msg TEXT NULL,
+	creation_timestamp timestamp without time zone NULL,
+	modification_timestamp timestamp without time zone NULL,
+	creator_id TEXT NULL,
+	modifier_id TEXT NULL,
+	is_void boolean NULL,
+	tenant_id integer NULL,
+	--id integer NOT NULL   DEFAULT NEXTVAL(('af."request_id_seq"'::text)::regclass), ?
+	method_id integer NULL
+);
+
