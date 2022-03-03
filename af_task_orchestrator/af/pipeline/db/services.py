@@ -1,6 +1,6 @@
-from af_task_orchestrator.af.pipeline.db.models import Job, weather_rain, weather_tmax, weather_tmin, weather_srad
+from af_task_orchestrator.af.pipeline.db.models import Job_Simulation, weather_rain, weather_tmax, weather_tmin, weather_srad
 from af_task_orchestrator.af.pipeline.db.models import mega_environments_wheat, soil, carbon, soil_water, \
-    init_residue_mass, init_root_mass, soil_nitrogen
+    init_residue_mass, init_root_mass, soil_nitrogen, Request_Simulation
 from af_task_orchestrator.af.pipeline.db.models import plating_date_winter_wheat, plating_date_spring_wheat, \
     nitrogen_app_irrigated, nitrogen_app_rainfed
 
@@ -101,11 +101,11 @@ def add(db_session, _object):
     return _object
 
 
-def create_job(db_session, analysis_id: int, job_name: str, status: str, status_message: str) -> Job:
+def create_job_simulation(db_session, job_id: int, job_name: str, status: str, status_message: str) -> Job_Simulation:
 
     job_start_time = datetime.utcnow()
-    job = Job(
-        analysis_id=analysis_id,
+    job = Job_Simulation(
+        job_id=job_id,
         name=job_name,
         time_start=job_start_time,
         creation_timestamp=job_start_time,
@@ -116,3 +116,7 @@ def create_job(db_session, analysis_id: int, job_name: str, status: str, status_
     job = add(db_session, job)
 
     return job
+
+
+def get_simulation_by_request_id(db_session, request_id):
+    return db_session.query(Request_Simulation).filter(Request_Simulation.uuid == request_id).first()

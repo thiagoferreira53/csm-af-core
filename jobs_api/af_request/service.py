@@ -23,3 +23,14 @@ def submit(request_params):
         requestor_id=request_params.requestorId,
         status="PENDING",
     )
+
+    with db.session.begin():
+        db.session.add(req)
+
+        celery_util.send_task(
+            process_name="analyze",
+            args=(
+                req.uuid,
+                json.loads(request_params.json()),
+            ),
+        )

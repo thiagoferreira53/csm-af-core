@@ -13,7 +13,7 @@ from af_task_orchestrator.af.pipeline.dpo import ProcessData
 from af_task_orchestrator.af.pipeline.exceptions import AnalysisError, DpoException, InvalidAnalysisRequest
 from af_task_orchestrator.af.pipeline.db import services as db_services
 from af_task_orchestrator.af.pipeline import utils
-from af_task_orchestrator.af.pipeline.db.models import Job
+from af_task_orchestrator.af.pipeline.db.models import Job_Simulation
 from af_task_orchestrator.af.pipeline.data_reader.exceptions import DataReaderException
 
 
@@ -39,7 +39,7 @@ class Analyze(abc.ABC):
 
         self.dssat_path = config.get_dssat_path()
 
-        self.DSSAT_analysis = db_services.get_analysis_by_request_id(self.db_session, request_id=analysis_request.requestId)
+        self.DSSAT_analysis = db_services.get_simulation_by_request_id(self.db_session, request_id=analysis_request.requestId)
 
 
     def get_process_data(self, analysis_request, *args, **kwargs):
@@ -89,10 +89,10 @@ class Analyze(abc.ABC):
         finally:
             self.db_session.commit()
 
-    def _get_new_job(self, job_name: str, status: str, status_message: str) -> Job:
+    def _get_new_job(self, job_name: str, status: str, status_message: str) -> Job_Simulation:
 
         job_start_time = datetime.utcnow()
-        job = Job(
+        job = Job_Simulation(
             analysis_id=self.analysis.id,
             name=job_name,
             time_start=job_start_time,
@@ -105,7 +105,7 @@ class Analyze(abc.ABC):
 
         return job
 
-    def _update_job(self, job: Job, status: str, status_message: str):
+    def _update_job(self, job: Job_Simulation, status: str, status_message: str):
 
         job.status = status
         job.status_message = status_message

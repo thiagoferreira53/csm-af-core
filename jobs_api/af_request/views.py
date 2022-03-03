@@ -51,32 +51,6 @@ def list():
     return json_response(response, HTTPStatus.OK)
 
 
-@af_requests_bp.route("/<request_uuid>")
-def get(request_uuid: str):
-    """Get the request object identified by the request_uuid url param."""
-
-    try:
-        analysis = service.get_by_id(request_uuid)
-        req_dto = api_models.AnalysisRequestResponse(result=_map_analsysis(analysis))
-        return json_response(req_dto, HTTPStatus.OK)
-    except NoResultFound:
-        error_response = api_models.ErrorResponse(errorMsg="AnalysisRequest not found")
-        return json_response(error_response, HTTPStatus.NOT_FOUND)
-    except MultipleResultsFound:
-        error_response = api_models.ErrorResponse(errorMsg="Multiple results found")
-        return json_response(error_response, HTTPStatus.INTERNAL_SERVER_ERROR)
-
-
-@af_requests_bp.route("/<request_uuid>/files/result.zip")
-def download_result(request_uuid: str):
-    """Download file result of analysis request as zip file"""
-
-    request_uuid_without_hyphens = request_uuid.replace("-", "")
-    download_name = f"{request_uuid_without_hyphens}.zip"
-
-    return send_from_directory(
-        config.get_analysis_request_folder(request_uuid), "result.zip", as_attachment=True, download_name=download_name
-    )
 
 
 def _map_analysis(analysis):

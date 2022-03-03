@@ -118,7 +118,7 @@ class mega_environments_wheat(Base):
 
 class BaseMixin(object):
 
-    __table_args__ = {"schema": "af-core"}
+    __table_args__ = {"schema": "public"}
 
     id = Column(Integer, primary_key=True)
 
@@ -130,36 +130,27 @@ class BaseMixin(object):
 
 
 
+class Request_Simulation(BaseMixin, Base):
 
-class Request(BaseMixin, Base):
-
-    __tablename__ = "request"  # Base.metadata.tables["af-core.request"]
+    __tablename__ = "request_simulation"  # Base.metadata.tables["af-core.request"]
 
     uuid = Column(String)
     category = Column(String)
     type = Column(String)
-    design = Column(String)
     requestor_id = Column(String)
     institute = Column(String)
     crop = Column(String)
-    program = Column(String)
-    tenant_id = Column(Integer)
-    method_id = Column(Integer)
-
-    engine = Column(String)
-
     status = Column(String)
     msg = Column(String)
 
-    analyses = relationship("Analysis", back_populates="request")
-
     # TODO add the other columns here
-    tasks = relationship("Task", backref="request")
+    tasks = relationship("Task_Simulation", backref="request_simulation")
+    
 
 
-class Task(BaseMixin, Base):
+class Task_Simulation(BaseMixin, Base):
 
-    __tablename__ = "task"
+    __tablename__ = "task_simulation"
 
     name = Column(String)
     time_start = Column(DateTime)
@@ -167,38 +158,16 @@ class Task(BaseMixin, Base):
     status = Column(String)
     err_msg = Column(String)
     processor = Column(String)
-    tenant_id = Column(Integer, nullable=False)
-    request_id = Column(Integer, ForeignKey("af-core.request.id"))
-    parent_id = Column(Integer)
+    request_id = Column(Integer, ForeignKey("public.request_simulation.id"))
 
-class Analysis(BaseMixin, Base):
+class Job_Simulation(BaseMixin, Base):
 
-    __tablename__ = "analysis"
+    __tablename__ = "job_simulation"
 
-    name = Column(String)
-    description = Column(String)
-    request_id = Column(Integer, ForeignKey(Request.id))
-    prediction_id = Column(Integer)
-    status = Column(String)
-    tenant_id = Column(Integer)
-    model_id = Column(Integer)
-
-    request = relationship(Request, back_populates="analyses")
-
-    jobs = relationship("Job", back_populates="analysis")
-
-
-class Job(BaseMixin, Base):
-
-    __tablename__ = "job"
-
-    analysis_id = Column(Integer, ForeignKey(Analysis.id))
+    job_id = Column(Integer) #?# removed foreign keys from Analysis - Added job_id
     name = Column(String)
     time_start = Column(DateTime)
     time_end = Column(DateTime)
     output_path = Column(String)
     status = Column(String)
     status_message = Column(String)
-    tenant_id = Column(Integer)
-
-    analysis = relationship(Analysis, back_populates="jobs")
