@@ -182,9 +182,12 @@ create trigger raster_data_ME
 DROP TABLE IF EXISTS request_simulation CASCADE;
 DROP TABLE IF EXISTS task_simulation CASCADE;
 DROP TABLE IF EXISTS job_simulation CASCADE;
+DROP TABLE IF EXISTS simulation_data CASCADE;
+
 DROP SEQUENCE IF EXISTS request_id_seq;
 DROP SEQUENCE IF EXISTS task_id_seq;
 DROP SEQUENCE IF EXISTS job_id_seq;
+DROP SEQUENCE IF EXISTS simulation_data_id_seq;
 
 
 CREATE TABLE request_simulation
@@ -195,7 +198,13 @@ CREATE TABLE request_simulation
 	requestor_id TEXT NULL,
 	institute TEXT NULL,
 	crop TEXT NULL,
-	status TEXT NULL,
+    model TEXT NULL, 
+    latitude TEXT NULL,
+    longitude TEXT NULL,
+    startdate TEXT NULL,
+    enddate TEXT NULL,
+    irrtype TEXT NULL,
+    status TEXT NULL,
     msg TEXT NULL,
 	creation_timestamp timestamp without time zone NULL,
 	modification_timestamp timestamp without time zone NULL,
@@ -246,6 +255,28 @@ CREATE TABLE job_simulation
 
 CREATE SEQUENCE job_id_seq INCREMENT 1 START 1;
 
+CREATE TABLE simulation_data
+(
+	name TEXT NULL,
+	description TEXT NULL,
+	status TEXT NULL,
+	creation_timestamp timestamp without time zone NULL,
+	modification_timestamp timestamp without time zone NULL,
+	creator_id TEXT NULL,
+	modifier_id TEXT NULL,
+    model TEXT NULL, 
+    latitude TEXT NULL,
+    longitude TEXT NULL,
+    startdate TEXT NULL,
+    enddate TEXT NULL,
+    irrtype TEXT NULL,
+	is_void boolean NULL,
+	id integer NOT NULL   DEFAULT NEXTVAL(('"simulation_data_id_seq"'::text)::regclass),
+	request_id integer NULL
+);
+
+CREATE SEQUENCE simulation_data_id_seq INCREMENT 1 START 1;
+
 ALTER TABLE task_simulation ADD CONSTRAINT "PK_task"
     PRIMARY KEY (id);
 
@@ -255,7 +286,13 @@ ALTER TABLE request_simulation ADD CONSTRAINT "PK_request"
 ALTER TABLE job_simulation ADD CONSTRAINT "PK_job"
 	PRIMARY KEY (id);
 
+ALTER TABLE simulation_data ADD CONSTRAINT "PK_simulation_data"
+	PRIMARY KEY (id);
+
 ALTER TABLE task_simulation ADD CONSTRAINT "FK_task_request"
+	FOREIGN KEY (request_id) REFERENCES request_simulation (id) ON DELETE No Action ON UPDATE No Action;
+
+ALTER TABLE simulation_data ADD CONSTRAINT "FK_simulation_request"
 	FOREIGN KEY (request_id) REFERENCES request_simulation (id) ON DELETE No Action ON UPDATE No Action;
 
 ALTER TABLE job_simulation
@@ -264,12 +301,18 @@ ALTER TABLE job_simulation
 ALTER TABLE job_simulation
  ALTER COLUMN is_void SET DEFAULT false;
 
+ALTER TABLE simulation_data
+ ALTER COLUMN creation_timestamp SET DEFAULT now();
+
+ALTER TABLE simulation_data
+ ALTER COLUMN is_void SET DEFAULT false;
+
 
 --test
 
-INSERT INTO request_simulation(id, uuid, category, type, requestor_id, institute, crop, status, creation_timestamp, modification_timestamp, creator_id, modifier_id, is_void) VALUES
-(1, 'c1444c0d-d698-4ec6-9d18-02d96fb358c3', 1, 'Trial Design', 1, 'CIMMYT', 'wheat', 'new', null, null, '0', '0', false);
+--INSERT INTO request_simulation(id, uuid, category, type, requestor_id, institute, crop, status, creation_timestamp, modification_timestamp, creator_id, modifier_id, is_void) VALUES
+--(1, 'c1444c0d-d698-4ec6-9d18-02d96fb358c3', 1, 'Trial Design', 1, 'CIMMYT', 'wheat', 'new', null, null, '0', '0', false);
 
 
-INSERT INTO task_simulation(id, name, time_start,time_end,status,err_msg, processor, creation_timestamp, modification_timestamp, creator_id, modifier_id, is_void, request_id) VALUES
-(1,'a',null, null, 'new', 'abc', '1', now(), null, '1', '1', false, (select id from request_simulation where id = 1));
+--INSERT INTO task_simulation(id, name, time_start,time_end,status,err_msg, processor, creation_timestamp, modification_timestamp, creator_id, modifier_id, is_void, request_id) VALUES
+--(1,'a',null, null, 'new', 'abc', '1', now(), null, '1', '1', false, (select id from request_simulation where id = 1));

@@ -17,7 +17,6 @@ class AFDBService:
             time_start=datetime.datetime.now(),
             status="STARTED",
             processor="celery",
-            tenant_id=1,
             creator_id=1,
         )
         request.tasks.append(task)

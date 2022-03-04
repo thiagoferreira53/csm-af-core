@@ -129,7 +129,6 @@ class BaseMixin(object):
     is_void = Column(Boolean, default=False)
 
 
-
 class Request_Simulation(BaseMixin, Base):
 
     __tablename__ = "request_simulation"  # Base.metadata.tables["af-core.request"]
@@ -140,12 +139,19 @@ class Request_Simulation(BaseMixin, Base):
     requestor_id = Column(String)
     institute = Column(String)
     crop = Column(String)
+    model = Column(String)
+    latitude = Column(String)
+    longitude = Column(String)
+    startdate = Column(String)
+    enddate = Column(String)
+    irrtype = Column(String)
     status = Column(String)
     msg = Column(String)
 
+    simulation_req = relationship("Simulation_Data", back_populates="simulation_req")
+
     # TODO add the other columns here
     tasks = relationship("Task_Simulation", backref="request_simulation")
-    
 
 
 class Task_Simulation(BaseMixin, Base):
@@ -160,14 +166,38 @@ class Task_Simulation(BaseMixin, Base):
     processor = Column(String)
     request_id = Column(Integer, ForeignKey("public.request_simulation.id"))
 
+
+class Simulation_Data(BaseMixin, Base):
+
+    __tablename__ = "simulation_data"
+
+    name = Column(String)
+    description = Column(String)
+    request_id = Column(Integer, ForeignKey(Request_Simulation.id))
+    status = Column(String)
+    model = Column(String)
+    latitude = Column(String)
+    longitude = Column(String)
+    startdate = Column(String)
+    enddate = Column(String)
+    irrtype = Column(String)
+
+    simulation_req = relationship(Request_Simulation, back_populates="simulation_req")
+
+    jobs = relationship("Job_Simulation", back_populates="simulation_req")
+
+
 class Job_Simulation(BaseMixin, Base):
 
     __tablename__ = "job_simulation"
 
-    job_id = Column(Integer) #?# removed foreign keys from Analysis - Added job_id
+    simulation_id = Column(Integer, ForeignKey(Simulation_Data.id))
     name = Column(String)
     time_start = Column(DateTime)
     time_end = Column(DateTime)
     output_path = Column(String)
     status = Column(String)
     status_message = Column(String)
+
+    simulation_req = relationship(Simulation_Data, back_populates="jobs")
+

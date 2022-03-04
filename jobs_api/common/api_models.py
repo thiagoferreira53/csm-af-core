@@ -43,6 +43,7 @@ class ErrorResponse(BaseModel):
 class AnalysisType(str, Enum):
     ANALYZE = "ANALYZE"
     RANDOMIZE = "RANDOMIZE"
+    DSSAT_SIMULATION = "DSSAT_SIMULATION"
 
 
 class Status(str, Enum):
@@ -60,6 +61,7 @@ class Status(str, Enum):
 class DataSource(str, Enum):
     EBS = "EBS"
     BRAPI = "BRAPI"
+    DSSAT = "DSSAT"
 
 
 class Property(BaseModel):

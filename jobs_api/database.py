@@ -18,7 +18,6 @@ class BaseModel(Model):
     creator_id = sa.Column(sa.String)
     modifier_id = sa.Column(sa.String)
     is_void = sa.Column(sa.Boolean, default=False)
-    tenant_id = sa.Column(sa.Integer)
 
 
 # database instance
