@@ -13,7 +13,7 @@ result_backend = os.getenv("BACKEND")
 
 
 imports = [
-    "af_task_orchestrator.af.orchestrator.processing.tasks",
+    "af_task_orchestrator.af.orchestrator.processing.analyze.tasks",
     "af_task_orchestrator.af.orchestrator.processing.analyze.dssat_tasks",
     "af_task_orchestrator.af.orchestrator.processing.dssat.tasks"
 ]
