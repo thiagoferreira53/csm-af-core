@@ -50,5 +50,11 @@ def submit(request_params):
 
     with db.session.begin():
         db.session.add(simulation)
-
+        celery_util.send_task(
+            process_name="prepare_simulation",
+            args=(
+                req.uuid,
+                json.loads(request_params.json()),
+            ), #queue="DSSAT",
+        )
     return simulation

@@ -6,14 +6,13 @@ from pydantic import BaseModel
 class DSSAT_AnalysisRequest(BaseModel):
     requestId: str
     dataSource: DataSource
-    dataType: DataType
+#    dataType: DataType
     dataSourceAccessToken: str
     latitude : str #?#list[str]
     longitude : str #list[str]
-    startDate: str
-    endDate: str
+    startdate: str
+    enddate: str
     crop: str
-    IrrType: str #list[str]
-
+    irrtype: str #list[str]
 
 

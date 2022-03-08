@@ -4,7 +4,7 @@ from af_task_orchestrator.af.pipeline.db.models import mega_environments_wheat, 
 from af_task_orchestrator.af.pipeline.db.models import plating_date_winter_wheat, plating_date_spring_wheat, \
     nitrogen_app_irrigated, nitrogen_app_rainfed
 
-import datetime
+from datetime import datetime
 from geoalchemy2.elements import WKTElement
 
 def coord_to_point(latitude: float, longitude: float):
@@ -15,8 +15,8 @@ def coord_to_point(latitude: float, longitude: float):
     return point
 
 def get_daily_weather_info(dbsession, start_date: str, end_date: str, latitude: float, longitude: float):
-    sdate = datetime.datetime.strptime(start_date, '%Y/%m/%d')
-    edate = datetime.datetime.strptime(end_date, '%Y/%m/%d')
+    sdate = datetime.strptime(start_date, '%Y/%m/%d')
+    edate = datetime.strptime(end_date, '%Y/%m/%d')
 
     wkt_element = coord_to_point(latitude,longitude)
 
@@ -105,7 +105,7 @@ def create_job_simulation(db_session, job_id: int, job_name: str, status: str, s
 
     job_start_time = datetime.utcnow()
     job = Job_Simulation(
-        job_id=job_id,
+        simulation_id=job_id,
         name=job_name,
         time_start=job_start_time,
         creation_timestamp=job_start_time,
@@ -117,6 +117,14 @@ def create_job_simulation(db_session, job_id: int, job_name: str, status: str, s
 
     return job
 
+def update_job(db_session, job: Job_Simulation, status: str, status_message: str):
+
+    job.status = status
+    job.status_message = status_message
+    job.time_end = datetime.utcnow()
+    job.modification_timestamp = datetime.utcnow()
+
+    return job
 
 def get_simulation_by_request_id(db_session, request_id):
     return db_session.query(Request_Simulation).filter(Request_Simulation.uuid == request_id).first()

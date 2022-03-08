@@ -7,6 +7,7 @@ import glob
 from af_task_orchestrator.af.pipeline.dssat.services import get_weather_data, run_dssat_simulation, get_crop_data
 from af_task_orchestrator.af.pipeline.dpo import ProcessData
 from af_task_orchestrator.af.pipeline import config
+from af_task_orchestrator.af.pipeline.job_data import JobData
 
 
 class DSSATProcessData(ProcessData):
@@ -23,12 +24,16 @@ class DSSATProcessData(ProcessData):
 
         self.job_folder = self.get_job_folder(self.__get_job_name())
 
+        job_data = JobData()
+        job_data.job_name = self.__get_job_name()
+        job_data.job_file = os.path.join(self.job_folder, f"{self.__get_job_name()}.json") #I might write outputs here
+
         crop = self.analysis_request.crop
         latitude = self.analysis_request.latitude
         longitude = self.analysis_request.longitude
-        start_date = self.analysis_request.startDate
-        end_date = self.analysis_request.endDate
-        IR = self.analysis_request.IrrType
+        start_date = self.analysis_request.startdate
+        end_date = self.analysis_request.enddate
+        IR = self.analysis_request.irrtype
         path_dssat = config.DSSAT_P
 
         soil_id_num, startDate, endDate, startDOY, startDOYSim, FertDOY, endDOY, carbon, soil_water, Iresidue, \
@@ -43,6 +48,7 @@ class DSSATProcessData(ProcessData):
 
         run_dssat_simulation(self.job_folder, path_dssat)
 
+        return job_data
 
     def __postgis_crop_data(self, start_date, end_date, latitude, longitude, path, IR, crop):
 
@@ -121,11 +127,9 @@ class DSSATProcessData(ProcessData):
         exp = obj["parameters"]["experiment"]
         crop = obj["parameters"]["crop"]
         cropModel = obj["parameters"]["cropModel"]
-        print(cropModel)
 
         name = exp.split(".")[0]
 
-        print(name)
         expNam = re.findall("[a-zA-Z]+", exp.split(".")[0])
 
         expNum = re.findall("\d+", exp)[0]

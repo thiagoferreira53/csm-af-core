@@ -26,6 +26,9 @@ class Request_Simulation(db.Model):
     msg = db.Column(db.String)
     status = db.Column(db.String)
 
+    engine = db.Column(db.String)
+
+
     # TODO add the other columns here
     tasks = db.relationship("Task_Simulation", backref="request_simulation", foreign_keys="Task_Simulation.request_id")
 

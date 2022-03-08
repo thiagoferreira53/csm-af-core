@@ -1,5 +1,6 @@
 from af_task_orchestrator.af.pipeline.analysis_request import DSSAT_AnalysisRequest
 from af_task_orchestrator.af.pipeline.analyze import Analyze
+from af_task_orchestrator.af.pipeline.job_data import JobData
 
 from .dpo import DSSATProcessData
 
@@ -17,4 +18,7 @@ class DSSATAnalyze(Analyze):
         return ["dssat", job_data.job_file]
 
     def finalize(self, gathered_objects):
+        pass
+
+    def process_job_result(self, job_result: JobData, gathered_objects: dict = None):
         pass

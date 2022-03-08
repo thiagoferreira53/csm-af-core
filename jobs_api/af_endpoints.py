@@ -56,7 +56,6 @@ def get_data_source():
 
 @af_apis.route("/test", methods=["GET"])
 def test():
-    print('entrou em test')
     return render_template("loginExample.html")
 
 
@@ -68,7 +67,6 @@ def testredirect():
 @af_apis.route("/test/dssat", methods=["POST"])
 def testdssat():
     content = request.json
-    print(content)
     # req = Request(uuid=str(uuidlib.uuid4()))
     # db.session.add(req)
     # db.session.commit()

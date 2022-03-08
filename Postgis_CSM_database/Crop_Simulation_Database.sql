@@ -211,7 +211,8 @@ CREATE TABLE request_simulation
 	creator_id TEXT NULL, --?
 	modifier_id TEXT NULL, --?
 	is_void boolean NULL, --?
-    id integer NOT NULL   DEFAULT NEXTVAL(('"request_id_seq"'::text)::regclass)
+    id integer NOT NULL   DEFAULT NEXTVAL(('"request_id_seq"'::text)::regclass),
+    engine TEXT NULL
 );
 
 CREATE SEQUENCE request_id_seq INCREMENT 1 START 1;
@@ -250,7 +251,8 @@ CREATE TABLE job_simulation
 	creator_id TEXT NULL,
 	modifier_id TEXT NULL,
 	is_void boolean NULL,
-	id integer NOT NULL   DEFAULT NEXTVAL(('"job_id_seq"'::text)::regclass)
+	id integer NOT NULL   DEFAULT NEXTVAL(('"job_id_seq"'::text)::regclass),
+    simulation_id integer NULL
 );
 
 CREATE SEQUENCE job_id_seq INCREMENT 1 START 1;

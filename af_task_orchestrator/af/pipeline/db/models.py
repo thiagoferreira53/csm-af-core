@@ -148,6 +148,9 @@ class Request_Simulation(BaseMixin, Base):
     status = Column(String)
     msg = Column(String)
 
+    engine = Column(String)
+
+
     simulation_req = relationship("Simulation_Data", back_populates="simulation_req")
 
     # TODO add the other columns here

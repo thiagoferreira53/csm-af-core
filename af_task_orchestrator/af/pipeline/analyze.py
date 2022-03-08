@@ -39,7 +39,7 @@ class Analyze(abc.ABC):
 
         self.dssat_path = config.get_dssat_path()
 
-        self.DSSAT_analysis = db_services.get_simulation_by_request_id(self.db_session, request_id=analysis_request.requestId)
+        self.DSSAT_analysis = db_services.get_simulation_by_request_id(self.db_session, request_id=self.analysis_request.requestId)
 
 
     def get_process_data(self, analysis_request, *args, **kwargs):
@@ -67,14 +67,14 @@ class Analyze(abc.ABC):
     def run_job(self, job_data, analysis_engine=None):
         job_dir = utils.get_parent_dir(job_data.data_file)
 
-        job = db_services.create_job(
+        job = db_services.create_job_simulation(
             self.db_session, self.DSSAT_analysis.id, job_data.job_name, "IN-PROGRESS", "Processing in the input request"
         )
 
         try:
             cmd = self.get_cmd(job_data, analysis_engine)
             print(cmd)
-            _ = subprocess.run(cmd, capture_output=True)
+            #_ = subprocess.run(cmd, capture_output=True)
             job = db_services.update_job(
                 self.db_session, job, "IN-PROGRESS", "Completed the job. Pending post processing."
             )
@@ -83,7 +83,7 @@ class Analyze(abc.ABC):
 
             return job_data
         except Exception as e:
-            self.analysis.status = "FAILURE"
+            self.DSSAT_analysis.status = "FAILURE"
             db_services.update_job(self.db_session, job, "FAILURE", str(e))
             raise AnalysisError(str(e))
         finally:
@@ -93,7 +93,7 @@ class Analyze(abc.ABC):
 
         job_start_time = datetime.utcnow()
         job = Job_Simulation(
-            analysis_id=self.analysis.id,
+            simulation_id=self.DSSAT_analysis.id,
             name=job_name,
             time_start=job_start_time,
             creation_timestamp=job_start_time,
@@ -115,8 +115,8 @@ class Analyze(abc.ABC):
         return job
 
     def _update_request_status(self, status, message):
-        self.DSSAT_analysis.request.status = status
-        self.DSSAT_analysis.request.msg = message
+        self.DSSAT_analysis.status = status
+        self.DSSAT_analysis.msg = message
 
 
 
