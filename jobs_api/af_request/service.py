@@ -58,3 +58,9 @@ def submit(request_params):
             ), #queue="DSSAT",
         )
     return simulation
+
+
+def read_DSSAT_overview_file(file_name,  request_id):
+    data_request = celery_util.send_task_get(process_name="get_DSSAT_output_file", args=(file_name, request_id,), queue="DSSAT", routing_key="DSSAT")
+    print(data_request)
+    return data_request

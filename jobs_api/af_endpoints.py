@@ -72,10 +72,3 @@ def testdssat():
     # db.session.commit()
     celery_util.send_task(process_name="run_dssat", args=(content,), queue="DSSAT", routing_key="DSSAT")
     return jsonify({"status": "ok", "id": 1})
-
-@af_apis.route("/test/dssat", methods=["GET"])
-def get_simulation_summary():
-
-    celery_util.send_task(process_name="get_summary", args=(), queue="DSSAT", routing_key="DSSAT")
-    return "ok", 200
-

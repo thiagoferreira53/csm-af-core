@@ -1,10 +1,14 @@
+import os
+import pandas as pd
 from http import HTTPStatus
 
 from af_task_orchestrator.af.orchestrator import config
 from af_task_orchestrator.af.orchestrator.app import app
 from jobs_api.common.responses import json_response
 from af_task_orchestrator.af.pipeline import analyze as pipeline_analyze
+from af_task_orchestrator.af.pipeline import config as pipeline_config
 from af_task_orchestrator.af.pipeline.analysis_request import DSSAT_AnalysisRequest
+from celery import current_task
 
 from af_task_orchestrator.af.orchestrator.base import StatusReportingTask, ResultReportingTask
 
@@ -64,6 +68,48 @@ def done_analyze(request_id, analysis_request, gathered_objects):
     # this is the terminal task to report DONE in tasks
     _ = pipeline_analyze.get_analyze_object(analysis_request).finalize(gathered_objects)
 
+    #print('test request id', current_task.request.args[1])
+
+@app.task(name="get_DSSAT_output_file", queue="DSSAT")
+def get_DSSAT_output_file(file, request_id):
+    output_folder = pipeline_config.OUT_DIR
+
+    path_to_output_files = os.path.join(output_folder, request_id)
+
+    if(file == 'summary'):
+        summary_file = path_to_output_files + '/Summary.OUT'
+
+        df = pd.read_csv(summary_file, skiprows=3, sep=r"\s+", index_col=False, engine='python')
+
+        # funky way to get rid of @ from header
+        cols = df.columns[1:]
+        df = df.drop('EPCP', 1)
+        df.columns = cols
+        df.columns = df.columns.str.replace('.', '')
+    
+    if(file =='plantgro'): #this method works as well for Weather.OUT files
+        plantgro_file = path_to_output_files + '/PlantGro.OUT'
+        df_list = []
+        count = 1 #for adding a new column that referes to the treatment number
+        with open(plantgro_file, 'r+') as myfile:
+            for myline in myfile:
+                if '@YEAR' in myline:
+                    bd = pd.DataFrame(columns = myline.split()) #get title
+                    for myline in myfile:
+                        if len(myline.strip()) == 0: #skip to the next if there is no more row for the treatment
+                            break
+                        bd.loc[len(bd)] = myline.split() #append rows to the dataframe
+                    bd['TRT'] = count
+                    count = count + 1
+                    df_list.append(bd)
+
+        #print(df_list)
+        df = pd.concat(df_list, ignore_index=True)
+        #print(df)
+
+    output = df.to_json(indent=4)
+
+    return output
 
 
 #testing
@@ -80,14 +126,5 @@ def run_dssat(params: dict):
 
     analyze_object = pipeline_analyze.get_analyze_object(analysis_request)
     input_files = analyze_object.pre_process()
-
-#testing
-@app.task(name="get_summary", queue="DSSAT")  # , base=StatusReportingTask)
-def get_summary():
-    """params is a dict that should contain the following:
-
-    requestId:  the request uuid
-    """
-    analyze_object = pipeline_analyze.get_analyze_object()
 
 
