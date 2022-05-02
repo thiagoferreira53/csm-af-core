@@ -9,18 +9,19 @@
 library(dplyr)
 library(tidyr)
 library(raster)
+library(rgdal)
 
 #setwd
 
 #Command line only
-sourceDirectory = system("pwd", intern = T)
-#sourceDirectory = "/Users/thiagoferreira53/Projects/pysimba+DSSAT/database/weather_data"
+#sourceDirectory = system("pwd", intern = T)
+sourceDirectory = "/Users/thiagoferreira53/Projects/af-core/Postgis_CSM_database/weather_data"
 
 outputDirectory = paste0(sourceDirectory,"/tiff_outputs")
 
 #SET THE STAR
 startDate = as.Date("1980/01/01",format="%Y/%m/%d")
-endDate = as.Date("1983/10/31",format="%Y/%m/%d")
+endDate = as.Date("2010/09/30",format="%Y/%m/%d")
 
 days<- seq(startDate, endDate, by="days")
 
@@ -28,7 +29,7 @@ convert_tiff<-function(day){
   DayYear<-substring(strftime(day, format = "%Y%j"),3,7)
   DOY <- gsub("(?<![0-9])0+", "", DayYear, perl = TRUE)
   
-  rows <- system(paste0("cd ",sourceDirectory,"; grep -w ",DOY," *.csv"), intern = TRUE)
+  rows <- system(paste0("cd ",sourceDirectory,"/Historical_Weather_6_Points; grep -w ",DOY," *.csv"), intern = TRUE)
   daiyValues<- gsub("[\r\n]", "", rows)
   
   splitDaily <-strsplit(daiyValues,":")

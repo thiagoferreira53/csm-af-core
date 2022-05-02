@@ -1,8 +1,4 @@
-import pandas as pd
 from csv import reader
-import re
-from datetime import datetime
-path_folder = '/Users/thiagoferreira53/Downloads/Embrapa-Bangladesh/Pythia+GDM/triangulo-outputs/Feb_15/-18.00S/-043.00W/'
 path_folder =  '/Users/thiagoferreira53/Desktop/EBS/Output_folder/c72c6ed0-7834-4401-af54-bafb7ec7c3c0/'
 
 

@@ -5,7 +5,7 @@ import os
 
 cfg={}
 def readConfig():
-    confPath = os. getcwd() +"/db_info.conf"
+    confPath = os.getcwd() +"/db_info.conf"
 
     simbaConf = open(confPath, 'r')
 
@@ -38,7 +38,7 @@ conn = psycopg2.connect("dbname=" +dbName + " user=" + user + " password=" + pwd
 print(conn)
 cursor = conn.cursor()
 
-cursor.execute("CREATE EXTENSION postgis;")
+#cursor.execute("CREATE EXTENSION postgis;")
 #cursor.execute("CREATE EXTENSION postgis_raster;")
 
 triggerFunction = "create or replace function raster_data_BI()returns trigger as $$\ndeclare\n  v_date text;\n  v_version text;\n" \
@@ -50,12 +50,12 @@ cursor.execute(triggerFunction)
 
 for i in dbVariables:
 
-    sqlCreateTable = "CREATE TABLE historical_weather_" + i + "\n(\n    RID BIGSERIAL NOT NULL,\n    DATE DATE PRIMARY KEY," \
+    sqlCreateTable = "CREATE TABLE IF NOT EXISTS historical_weather_" + i + "\n(\n    RID BIGSERIAL NOT NULL,\n    DATE DATE PRIMARY KEY," \
         "\n    RAST RASTER,\n    FILENAME TEXT,\n    VARIABLE CHARACTER VARYING(10)\n);"
     print(sqlCreateTable)
     cursor.execute(sqlCreateTable)
 
-    triggerDB = "create trigger raster_data_BI\n    before insert\n    on historical_weather_" + i + "\n    for each row" \
+    triggerDB = "create or replace trigger raster_data_BI\n    before insert\n    on historical_weather_" + i + "\n    for each row" \
         "\n    execute procedure raster_data_BI();"
 
     cursor.execute(triggerDB)
@@ -69,7 +69,7 @@ for i in dbVariables:
 #MEGA ENVIRONMENTS
 
 GlobalData = ["soil", "carbon", "soil_water", "winter_wheat", "spring_wheat","n_irrigated",\
-              "n_rainfed","initial_res_mass","initial_root_mass","soil_nitrogen"]
+              "n_rainfed","init_res_mass","init_root_mass","soil_nitrogen"]
 
 triggerFunction = "create or replace function raster_data_GD()returns trigger as $$"\
 "\ndeclare"\
@@ -85,13 +85,13 @@ cursor.execute(triggerFunction)
 
 
 for j in GlobalData:
-    sqlCreateTable = "CREATE TABLE " + j + "\n(\n    ID INT PRIMARY KEY,\n    RID BIGSERIAL NOT NULL," \
+    sqlCreateTable = "CREATE TABLE IF NOT EXISTS " + j + "\n(\n    ID INT PRIMARY KEY,\n    RID BIGSERIAL NOT NULL," \
         "\n    RAST RASTER,\n    FILENAME TEXT\n);"
     print(sqlCreateTable)
     cursor.execute(sqlCreateTable)
     conn.commit()
 
-    triggerGD = "create trigger raster_data_GD\n    before insert\n    on " + j + "\n    for each row" \
+    triggerGD = "create or replace trigger raster_data_GD\n    before insert\n    on " + j + "\n    for each row" \
         "\n    execute procedure raster_data_GD();"
 
     cursor.execute(triggerGD)
@@ -115,7 +115,7 @@ triggerFunctionME = "create or replace function raster_data_ME()returns trigger 
 
 cursor.execute(triggerFunctionME)
 
-sqlCreateTable = "\nCREATE TABLE mega_env"\
+sqlCreateTable = "\nCREATE TABLE IF NOT EXISTS mega_env"\
 "\n("\
 "\n    RID BIGSERIAL NOT NULL,"\
 "\n    NAME TEXT PRIMARY KEY,"\
@@ -127,7 +127,7 @@ print(sqlCreateTable)
 cursor.execute(sqlCreateTable)
 conn.commit()
 
-triggerDB = "create trigger raster_data_ME"\
+triggerDB = "create or replace trigger raster_data_ME"\
 "\n    before insert" \
 "\n    on mega_env"\
 "\n    for each row"\

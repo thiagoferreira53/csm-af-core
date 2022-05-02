@@ -3,6 +3,7 @@
 --
 
 CREATE EXTENSION postgis;
+CREATE EXTENSION postgis_raster;
 
 CREATE TABLE Historical_Weather_RAIN
 (
@@ -173,6 +174,43 @@ create trigger raster_data_ME
     on mega_env
     for each row
     execute procedure raster_data_ME();
+
+-- 
+-- helpful
+--
+
+--DROP TABLE IF EXISTS carbon CASCADE;
+--DROP TABLE IF EXISTS historical_weather_rain CASCADE;
+--DROP TABLE IF EXISTS historical_weather_srad CASCADE;
+--DROP TABLE IF EXISTS historical_weather_tmax CASCADE;
+--DROP TABLE IF EXISTS historical_weather_tmin CASCADE;
+--DROP TABLE IF EXISTS init_res_mass CASCADE;
+--DROP TABLE IF EXISTS init_root_mass CASCADE;
+--DROP TABLE IF EXISTS mega_env CASCADE;
+--DROP TABLE IF EXISTS n_irrigated CASCADE;
+--DROP TABLE IF EXISTS n_rainfed CASCADE;
+--DROP TABLE IF EXISTS soil CASCADE;
+--DROP TABLE IF EXISTS soil_nitrogen CASCADE;
+--DROP TABLE IF EXISTS soil_water CASCADE;
+--DROP TABLE IF EXISTS spring_wheat CASCADE;
+--DROP TABLE IF EXISTS winter_wheat CASCADE;
+
+--select st_value(soil.rast, st_setsrid(st_makepoint (-172.5417, 89.95761), 4326)) as soil_id
+--from soil;
+
+--select rainwd.date as date, st_value(rainwd.rast, st_setsrid(st_makepoint (78.75, 24.75), 4326)) as rain, 
+--st_value(tmaxwd.rast, st_setsrid(st_makepoint (78.75, 24.75), 4326)) as tmax, 
+--st_value(tminwd.rast, st_setsrid(st_makepoint (78.75, 24.75), 4326)) as tmin, 
+--st_value(sradwd.rast, st_setsrid(st_makepoint (78.75, 24.75), 4326)) as srad 
+--from historical_weather_rain as rainwd 
+--inner join historical_weather_tmax as tmaxwd on
+--    rainwd.date = tmaxwd.date
+--inner join historical_weather_tmin as tminwd on
+--    rainwd.date = tminwd.date
+--inner join historical_weather_srad as sradwd on
+--    rainwd.date = sradwd.date
+--where rainwd.date >= '2009-12-31'
+--  AND rainwd.date <= '2010-01-10';
 
 -- 
 -- request manager tables

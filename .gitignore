@@ -6,7 +6,6 @@
 *.as
 *.tmp
 *.tbl
-*.conf
 *.out
 *.LOG
 *.DS_Store
@@ -16,6 +15,10 @@
 *.sif
 .coverage
 .env
+*.asc
+*.xml
+.tif
+*.csv
 
 # Ignore folders
 __pycache__/
@@ -29,3 +32,4 @@ venv-dev
 docs/notebooks/.ipynb*
 .vscode
 htmlcov/
+Postgis_CSM_database/weather_data/tiff_outputs/
