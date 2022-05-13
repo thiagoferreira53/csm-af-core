@@ -113,7 +113,6 @@ class mega_environments_wheat(Base):
     filename = Column(String)
 
 
-
 ##FROM EBS
 
 class BaseMixin(object):
@@ -139,12 +138,7 @@ class Request_Simulation(BaseMixin, Base):
     requestor_id = Column(String)
     institute = Column(String)
     crop = Column(String)
-    model = Column(String)
-    latitude = Column(String)
-    longitude = Column(String)
-    startdate = Column(String)
-    enddate = Column(String)
-    irrtype = Column(String)
+    experimentname = Column(String)
     status = Column(String)
     msg = Column(String)
 
@@ -177,13 +171,9 @@ class Simulation_Data(BaseMixin, Base):
     name = Column(String)
     description = Column(String)
     request_id = Column(Integer, ForeignKey(Request_Simulation.id))
+    experimentname = Column(String)
     status = Column(String)
-    model = Column(String)
-    latitude = Column(String)
-    longitude = Column(String)
-    startdate = Column(String)
-    enddate = Column(String)
-    irrtype = Column(String)
+    crop = Column(String)
 
     simulation_req = relationship(Request_Simulation, back_populates="simulation_req")
 

@@ -9,10 +9,6 @@ from af_request import models as db_models
 from database import db
 
 
-#class DataCoordinates(pydantic.BaseModel): #?# use?
-#    latitude: list[api_models.Experiment] = None
-#    traits: list[api_models.Trait] = None
-
 def submit(request_params):
     """Submits analysis request to pipeline."""
 
@@ -22,12 +18,11 @@ def submit(request_params):
         category = "Crop Growth Simulation",
         institute=request_params.institute,
         crop=request_params.crop,
+        experimentname=request_params.experimentname,
         type=request_params.analysisType,
         requestor_id=request_params.requestorId,
         status="PENDING",
     )
-
-#    req_data = DataCoordinates(**request_params.dict())
 
     additionalInfo = {"data_sources":
     [{'source' : request_params.dataSource, 'url' : request_params.dataSourceUrl, 'token' : request_params.dataSourceAccessToken}]}
@@ -37,13 +32,9 @@ def submit(request_params):
         simulation_req=req,
         name=analysis_uuid,
         creation_timestamp=datetime.utcnow(),
+        experimentname=request_params.experimentname,
         status="IN-PROGRESS",
-        model=request_params.model,
-        latitude= request_params.latitude,
-        longitude= request_params.longitude,
-        startdate= request_params.startdate,
-        enddate= request_params.enddate,
-        irrtype= request_params.irrtype,
+        crop=request_params.crop,
 #        analysis_request_data=req_data.dict(),
 #        additional_info=additionalInfo
     )

@@ -1,3 +1,4 @@
+from typing import Dict, List
 from af_task_orchestrator.af.pipeline.data_reader.models.dssat_enum import DataSource, DataType
 from pydantic import BaseModel
 
@@ -8,11 +9,9 @@ class DSSAT_AnalysisRequest(BaseModel):
     dataSource: DataSource
 #    dataType: DataType
     dataSourceAccessToken: str
-    latitude : str #?#list[str]
-    longitude : str #list[str]
-    startdate: str
-    enddate: str
+    experimentname : str
     crop: str
-    irrtype: str #list[str]
+    model: list
+    parameters: list[Dict]
 
 

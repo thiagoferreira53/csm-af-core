@@ -3,8 +3,9 @@ import os
 import re
 from datetime import datetime
 import glob
+import numpy
 
-from af_task_orchestrator.af.pipeline.dssat.services import get_weather_data, run_dssat_simulation, get_crop_data
+from af_task_orchestrator.af.pipeline.dssat.services import get_weather_data, run_dssat_simulation, get_crop_data, write_fileX
 from af_task_orchestrator.af.pipeline.dpo import ProcessData
 from af_task_orchestrator.af.pipeline import config
 from af_task_orchestrator.af.pipeline.job_data import JobData
@@ -20,6 +21,7 @@ class DSSATProcessData(ProcessData):
         return f"{self.analysis_request.requestId}"
 
 
+
     def execute_simulation(self):
 
         self.job_folder = self.get_job_folder(self.__get_job_name())
@@ -29,150 +31,26 @@ class DSSATProcessData(ProcessData):
         job_data.job_file = os.path.join(self.job_folder, f"{self.__get_job_name()}.json") #I might write outputs here
 
         crop = self.analysis_request.crop
-        latitude = self.analysis_request.latitude
-        longitude = self.analysis_request.longitude
-        start_date = self.analysis_request.startdate
-        end_date = self.analysis_request.enddate
-        IR = self.analysis_request.irrtype
+
+        data_parameters = self.analysis_request.parameters
+
         path_dssat = config.DSSAT_P
 
-        soil_id_num, startDate, endDate, startDOY, startDOYSim, FertDOY, endDOY, carbon, soil_water, Iresidue, \
-        Iroot, Initro, NitroFert, IrrType, CultivarID, Cultivar = \
-            self.__postgis_crop_data(start_date, end_date, latitude, longitude, self.job_folder, IR, crop)
+        weather_name = 'AAAA'
+        for location in data_parameters[0].keys():
+            start_date = data_parameters[0][location]['startdate']
+            end_date = data_parameters[0][location]['enddate']
+            latitude = data_parameters[0][location]['latitude']
+            longitude = data_parameters[0][location]['longitude']
+            get_weather_data(self.db_session, start_date, end_date, latitude, longitude, self.job_folder, weather_name)
+            new = int(weather_name, 36) + 1
+            weather_name = numpy.base_repr(new, 36)
 
-        self.__read_input_DSSAT_standard(soil_id_num, startDate, endDate, startDOY, startDOYSim, FertDOY, endDOY,
-                                         carbon, soil_water, Iresidue, Iroot, Initro, NitroFert, IrrType, CultivarID,
-                                         Cultivar)
+        write_fileX(self.db_session, self.job_folder, self.analysis_request)
 
-        self.__write_bash_DSSAT(self.job_folder)
-
-        run_dssat_simulation(self.job_folder, path_dssat)
+        run_dssat_simulation(self.job_folder, path_dssat, crop)
 
         return job_data
-
-    def __postgis_crop_data(self, start_date, end_date, latitude, longitude, path, IR, crop):
-
-        get_weather_data(self.db_session, start_date, end_date, latitude, longitude, path)
-
-        soil, start_date, end_date, startDOY, startDOYSim, FertDOY, endDOY, carbon, soil_water, init_residue, \
-            init_root, init_nitr, nitr_irr, nitr_rf, CultivarID, \
-            Cultivar = get_crop_data(self.db_session, start_date, end_date, latitude, longitude, path, IR, crop)
-
-        return soil, start_date, end_date, startDOY, startDOYSim, FertDOY, endDOY, carbon, soil_water, init_residue, \
-           init_root, init_nitr, nitr_irr, nitr_rf, CultivarID, Cultivar
-
-
-    def __read_input_DSSAT_standard(self, soil_id_num, startDate, endDate, startDOY, startDOYSim, FertDOY, endDOY,
-                                         carbon, soil_water, Iresidue, Iroot, Initro, NitroFert, IrrType, CultivarID,
-                                         Cultivar) -> dict:
-
-        crop = self.analysis_request.crop
-
-        if(crop == 'wheat'):
-            soil_id = "HN_GEN00" + str(soil_id_num).zfill(2)
-
-            sd = datetime.strptime(startDate, '%Y/%m/%d')
-            ed = datetime.strptime(endDate, '%Y/%m/%d')
-
-            tmpl = open(config.TEMPLATES_FOLDER + '/FileX_Template.FLX', 'r')
-            fileX = tmpl.read()
-            fileX = re.sub("ssssssssss", str(soil_id), fileX)
-            fileX = re.sub("ppppS", "{:>5}".format(str(startDOY)), fileX)
-            fileX = re.sub("iiiiS", "{:>5}".format(str(startDOYSim)), fileX)
-            fileX = re.sub("ppppE", "{:>5}".format(str(endDOY)), fileX)
-            fileX = re.sub("rrrr", "{:>4}".format("2150"), fileX)
-            fileX = re.sub("wwww", "{:>4}".format("RRRR"), fileX)
-            fileX = re.sub("inres", "{:>5}".format(str(Iresidue)), fileX)
-            fileX = re.sub("rtwt", "{:>4}".format(str(Iroot)), fileX)
-            fileX = re.sub("nitro", "{:>5}".format(str(Initro)), fileX)
-            fileX = re.sub("fnn", "{:>5}".format("0"), fileX)
-            fileX = re.sub("nnnnn", "{:>5}".format(str(ed.year - sd.year)), fileX)
-            fileX = re.sub("Rco2p", "{:>5}".format("R 362"), fileX)
-            fileX = re.sub("CultID", "{:>6}".format(CultivarID), fileX)
-            fileX = re.sub("CultN", "{:<20}".format(Cultivar), fileX)
-            fileX = re.sub("fertD", "{:>5}".format(str(FertDOY)), fileX)
-            fileX = re.sub("scirm", "{:>5}".format(IrrType), fileX)
-
-            #models = ['CSCER', 'WHAPS', 'CSCRP']
-            models = ['CSCER', 'WHAPS']
-
-        count = 0
-        for i in models:
-            count = count + 1
-            fileX_gen = re.sub("model", "{:>5}".format(i), fileX)
-            fileX_gen = re.sub("trtname", "{:<6}".format(i), fileX_gen)
-
-            if int(NitroFert) <= 30:
-                fileX_gen = re.sub("nit1", "{:>4}".format(str(int(NitroFert) / 2)), fileX_gen)
-                fileX_gen = re.sub("nit2", "{:>4}".format(str(int(NitroFert) / 2)), fileX_gen)
-            if int(NitroFert) > 30 and int(NitroFert) < 100:
-                fileX_gen = re.sub("nit1", "{:>4}".format("30"), fileX_gen)
-                fileX_gen = re.sub("nit2", "{:>4}".format(str(int(NitroFert) - 30)), fileX_gen)
-            if int(NitroFert) >= 100:
-                fileX_gen = re.sub("nit1", "{:>4}".format("80"), fileX_gen)
-                fileX_gen = re.sub("nit2", "{:>4}".format(str(int(NitroFert) - 80)), fileX_gen)
-                # fileX_gen = re.sub("nit3", "{:>5}".format(str((NitroFert - 80)/2)), fileX)
-
-            DSSATjsonFile = open(self.job_folder + "/RRRR010" + str(count) + ".WHX", 'w')
-            DSSATjsonFile.write(fileX_gen)
-            DSSATjsonFile.close()
-
-    def __read_input_DSSAT_custom(self, obj, path_json) -> dict:
-        # extract path to the json file
-        path = os.path.split(path_json)[0]
-
-        workdir = obj["parameters"]["workdirectory"]
-        trt = obj["parameters"]["nTreatment"]
-        cul = obj["parameters"]["cultivar"]
-        exp = obj["parameters"]["experiment"]
-        crop = obj["parameters"]["crop"]
-        cropModel = obj["parameters"]["cropModel"]
-
-        name = exp.split(".")[0]
-
-        expNam = re.findall("[a-zA-Z]+", exp.split(".")[0])
-
-        expNum = re.findall("\d+", exp)[0]
-
-        cultivarIds = cul.split()
-
-        # Creat file X
-        for f in cultivarIds:
-            print("cul:" + f)
-            tmpl = open(path + '/' + exp, 'r')
-            fileX = tmpl.read()
-            fileX = re.sub("\[cuID\]", f.split(":")[0], fileX)
-            fileX = re.sub("\[cmID\]", cropModel, fileX)
-            fileX = re.sub("\[cuName\]", f.split(":")[1], fileX)
-            # print(fileX)
-            DSSATjsonPath = path + "/" + "".join(expNam) + str(
-                int(expNum) + cultivarIds.index(f) + 1) + "." + exp.split(".")[1]
-
-            DSSATjsonFile = open(DSSATjsonPath, 'w')
-            DSSATjsonFile.write(fileX)
-            DSSATjsonFile.close()
-        os.remove(path + '/' + exp)
-
-    #function required to execute every simulation request
-    def __write_bash_DSSAT(self, path):
-        #print(path + '/BatchFile.v48')
-        DSSATbatch = open(path + '/BatchFile.v48', 'w')
-        DSSATbatch.write("$BATCH(%s)\n" % "Wheat".upper())
-        DSSATbatch.write("!\n")
-        DSSATbatch.write("! Directory    : %s\n" % path)
-        DSSATbatch.write("! Command Line : %s B BatchFile.v48\n" % "/DSSAT48/dscsm048.exe")
-        DSSATbatch.write("! Crop         : %s\n" % "Wheat")
-        DSSATbatch.write("! Experiment   : %s\n" % "RRRR0100.WHX")
-        DSSATbatch.write("! ExpNo        : %s\n" % "1")
-        DSSATbatch.write("! Debug        : %s B BatchFile.v48\n" % "/DSSAT48/dscsm048.exe")
-        DSSATbatch.write("!\n")
-        DSSATbatch.write("%-93s %5s %6s %6s %6s %6s\n" % ("@FILEX", "TRTNO", "RP", "SQ", "OP", "CO"))
-        for fileNames in glob.glob(path + "/*.WHX"):
-            names = re.sub(".+\/", '', fileNames.rstrip())
-            print("Creating fileX: " + names)
-            DSSATbatch.write("%-93s %5s %6s %6s %6s %6s\n" % ("./" + names, 1, 1, 0, 0, 0))
-
-
 
 
     def run(self):
