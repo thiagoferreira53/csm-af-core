@@ -116,3 +116,15 @@ class CropSimulationRequestParameters(BaseModel):
     model: list = None
     parameters: list[Dict] = None
 
+class AnalysisRequestListQueryParameters(PaginationQueryParameters):
+    crop: Optional[str] = Field(None, description="Name of the crop")
+    requestorId: Optional[str] = Field(None, description="Id of the user who submits analysis request.")
+    institute: Optional[str] = Field(None, description="Name of the institute for which the analysis is submitted.")
+    status: Optional[Status] = None
+
+class SimulationRequestListResponseResult(BaseModel):
+    data: Optional[List[CropSimulationRequest]] = None
+
+class SimulationRequestListResponse(BaseModel):
+    metadata: Optional[Metadata] = None
+    result: Optional[SimulationRequestListResponseResult] = None

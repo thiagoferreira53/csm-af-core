@@ -32,6 +32,29 @@ def get_simulation_summary(file: str, request_uuid: str):
     overview_file_result = service.read_DSSAT_overview_file(file, request_uuid)
     return overview_file_result
 
+@af_requests_bp.route("/", methods=["GET"])
+def list():
+    """Create request object based on body params"""
+
+    query_params = api_models.AnalysisRequestListQueryParameters(**request.args)
+
+    analyses, total_count = service.query(query_params)
+
+    # DTOs for api response
+    analysis_request_dtos = []
+
+    for analysis in analyses:
+        columns = [m.key for m in analysis.__table__.columns]
+        #print(columns)
+        analysis_request_dtos.append(_map_analysis(analysis))
+
+    response = api_models.SimulationRequestListResponse(  
+        metadata=api_models.create_metadata(query_params.page, query_params.pageSize, total_count),
+        result=api_models.SimulationRequestListResponseResult(data=analysis_request_dtos),
+    )
+
+    return json_response(response, HTTPStatus.OK)
+
 def _map_analysis(analysis):
     """Maps the db result to the Result model."""
 

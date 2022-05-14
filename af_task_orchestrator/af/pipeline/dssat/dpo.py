@@ -5,7 +5,7 @@ from datetime import datetime
 import glob
 import numpy
 
-from af_task_orchestrator.af.pipeline.dssat.services import get_weather_data, run_dssat_simulation, get_crop_data, write_fileX
+from af_task_orchestrator.af.pipeline.dssat.services import get_weather_data, run_dssat_simulation, write_fileX
 from af_task_orchestrator.af.pipeline.dpo import ProcessData
 from af_task_orchestrator.af.pipeline import config
 from af_task_orchestrator.af.pipeline.job_data import JobData

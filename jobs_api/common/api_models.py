@@ -4,6 +4,7 @@
 
 from __future__ import annotations
 
+import math 
 from datetime import datetime
 from enum import Enum
 from typing import List, Optional
@@ -95,5 +96,17 @@ class PropertyListResponse(BaseModel):
     result: Optional[PropertyListResponseResult] = None
 
 
-def create_metadata(current_page, page_size):
-    return Metadata(pagination=Pagination(currentPage=current_page, pageSize=page_size))
+def create_metadata(current_page, page_size, total_count):
+    total_pages = __calculate_total_pages(page_size, total_count)
+    return Metadata(
+        pagination=Pagination(
+            currentPage=current_page, pageSize=page_size, totalCount=total_count, totalPages=total_pages
+        )
+    )
+
+def __calculate_total_pages(page_size, total_count):
+
+    if page_size == 0:
+        return 0
+
+    return math.ceil(total_count / page_size)

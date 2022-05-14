@@ -6,6 +6,7 @@ from pydantic import BaseModel
 #this might change later on to allow multiple locations, values, etc
 class DSSAT_AnalysisRequest(BaseModel):
     requestId: str
+    requestorId: str
     dataSource: DataSource
 #    dataType: DataType
     dataSourceAccessToken: str
