@@ -1,12 +1,12 @@
 import os
 
-os.environ['OUT_DIR'] = '/Users/thiagoferreira53/Desktop/CIMMYT/EBS/test_output_folder' #?# create env variable later on docker
+os.environ['OUT_DIR'] = '/Users/thiagoferreira53/Desktop/CIMMYT/EBS/requests' #?# create env variable later on docker
 
 ROOT_DATA_FOLDER = os.getenv("BA_DATA_DIR")
 
 ROOT_DATA_FOLDER_DSSAT = os.getenv("OUT_DIR")
 
-RESULT_DOWNLOAD_BY_REQUEST = "/test_output_folder/{request_id}/result.zip"
+RESULT_DOWNLOAD_BY_REQUEST = "/requests/{request_id}/result.zip"
 
 
 def get_analysis_request_folder(request_id: str) -> str:

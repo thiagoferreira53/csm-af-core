@@ -4,7 +4,7 @@ import os
 os.environ['AFDB_URL'] = 'postgresql://postgres:weather@localhost:5432/weather_data'
 os.environ['DSSAT_PATH'] = '/Users/thiagoferreira53/Projects/dssat-csm-os-48/build/bin/dscsm048'
 os.environ['TEMPLATES_FOLDER'] = '/Users/thiagoferreira53/Desktop/CIMMYT/EBS/template_folder'
-os.environ['OUT_DIR'] = '/Users/thiagoferreira53/Desktop/CIMMYT/EBS/test_output_folder' #?# create env variable later on docker
+os.environ['OUT_DIR'] = '/Users/thiagoferreira53/Desktop/CIMMYT/EBS/requests' #?# create env variable later on docker
 #
 
 
