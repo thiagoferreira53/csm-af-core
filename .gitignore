@@ -33,3 +33,5 @@ docs/notebooks/.ipynb*
 .vscode
 htmlcov/
 Postgis_CSM_database/weather_data/tiff_outputs/
+Postgis_CSM_database/weather_data/tiff_outputs_old/
+

@@ -1,7 +1,9 @@
 from af_task_orchestrator.af.pipeline.db.services import get_daily_weather_info, get_mega_env_id_wheat, get_soil_id, get_carbon_value
 from af_task_orchestrator.af.pipeline.db.services import get_soil_water_value, get_init_residue_mass_value, get_init_root_mass_value
 from af_task_orchestrator.af.pipeline.db.services import get_soil_nitrogen_value, get_plating_date_winter_wheat, get_plating_date_spring_wheat
-from af_task_orchestrator.af.pipeline.db.services import get_nitrogen_app_irrigated_value, get_nitrogen_app_rainfed_value, query_request_simulation
+from af_task_orchestrator.af.pipeline.db.services import get_nitrogen_app_irrigated_value, get_nitrogen_app_rainfed_value
+from af_task_orchestrator.af.pipeline import utils
+
 
 import os
 import csv
@@ -416,7 +418,7 @@ def create_cultivar_param():
     Creates cultivar file for Crop Growth Simulations.
     """
 
-def run_dssat_simulation(path, path_dssat_exe, crop):
+def run_dssat_simulation(path, path_dssat_exe, crop, job_name):
     """
     Executes DSSAT.
     """
@@ -429,9 +431,11 @@ def run_dssat_simulation(path, path_dssat_exe, crop):
     elif crop == 'maize':
         ext = 'MZX'
 
-    #rename weather file for simulation
-
     subprocess.call([path_dssat_exe, 'A', 'ECSM8001.'+ext])
+
+    #put results into zip file
+    output_zip_path = path + "/result.zip"
+    utils.zip_dir(path, output_zip_path, job_name)
 
 def get_simulation_predictions(job_id: int, prediction_result_file_path: str):
 

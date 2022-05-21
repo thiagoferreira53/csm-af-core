@@ -141,6 +141,8 @@ class Request_Simulation(BaseMixin, Base):
     experimentname = Column(String)
     status = Column(String)
     msg = Column(String)
+    creation_timestamp = Column(DateTime, default=datetime.datetime.now())
+    modification_timestamp = Column(DateTime, default=datetime.datetime.now())
 
     engine = Column(String)
 

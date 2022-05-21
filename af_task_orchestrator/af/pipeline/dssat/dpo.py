@@ -48,7 +48,7 @@ class DSSATProcessData(ProcessData):
 
         write_fileX(self.db_session, self.job_folder, self.analysis_request)
 
-        run_dssat_simulation(self.job_folder, path_dssat, crop)
+        run_dssat_simulation(self.job_folder, path_dssat, crop, job_data.job_name)
 
         return job_data
 

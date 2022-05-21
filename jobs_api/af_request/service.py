@@ -21,6 +21,8 @@ def submit(request_params):
         experimentname=request_params.experimentname,
         type=request_params.analysisType,
         requestor_id=request_params.requestorId,
+        creation_timestamp=datetime.utcnow(),
+        modification_timestamp=datetime.utcnow(),
         status="PENDING",
     )
 

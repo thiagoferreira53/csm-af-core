@@ -1,6 +1,7 @@
 from http import HTTPStatus
 from typing import List, Optional
 
+import os
 import config
 import pydantic
 from af_request import api_models, service
@@ -31,6 +32,22 @@ def get_simulation_summary(file: str, request_uuid: str):
     #return df_json_response()
     overview_file_result = service.read_DSSAT_overview_file(file, request_uuid)
     return overview_file_result
+
+@af_requests_bp.route("/<request_uuid>/result.zip")
+def download_result(request_uuid: str):
+    """Download file result of analysis request as zip file"""
+
+    request_folder = os.path.join(config.ROOT_DATA_FOLDER_DSSAT, request_uuid)
+    request_file = os.path.join(request_folder, 'result.zip')
+
+    if not os.path.exists(request_file):
+        error_response = api_models.ErrorResponse(errorMsg="Simulation Result file not found")
+        return json_response(error_response, HTTPStatus.NOT_FOUND)
+
+    request_uuid_without_hyphens = request_uuid.replace("-", "")
+    download_name = f"{request_uuid_without_hyphens}.zip"
+
+    return send_from_directory(request_folder, "result.zip", as_attachment=True, download_name=download_name)
 
 @af_requests_bp.route("/", methods=["GET"])
 def list():
@@ -71,5 +88,8 @@ def _map_analysis(analysis):
         createdOn=req.creation_timestamp,
         modifiedOn=req.modification_timestamp,
     )
+
+    if req.status == Status.DONE:
+        req_dto.resultDownloadRelativeUrl = config.get_result_download_url(req.uuid)
 
     return req_dto
