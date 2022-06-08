@@ -1,6 +1,7 @@
 import os
 import pandas as pd
 from http import HTTPStatus
+import json
 
 from af_task_orchestrator.af.orchestrator import config
 from af_task_orchestrator.af.orchestrator.app import app
@@ -107,7 +108,7 @@ def get_DSSAT_output_file(file, request_id):
         df = pd.concat(df_list, ignore_index=True)
         #print(df)
 
-    output = df.to_json(indent=4)
+    output = json.dumps(df.to_dict(orient='list'))
 
     return output
 

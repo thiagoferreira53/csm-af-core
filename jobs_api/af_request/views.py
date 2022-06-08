@@ -27,8 +27,10 @@ def post():
 
     return json_response(submitted_request_dto, HTTPStatus.CREATED)
 
-@af_requests_bp.route("/output/<file>/<request_uuid>", methods=["GET"])
-def get_simulation_summary(file: str, request_uuid: str):
+@af_requests_bp.route("/output/<file>/", methods=["GET"])
+def get_simulation_summary(file: str):
+    request_uuid = request.args['requestId']
+    print(request_uuid)
     #return df_json_response()
     overview_file_result = service.read_DSSAT_overview_file(file, request_uuid)
     return overview_file_result
@@ -52,7 +54,7 @@ def download_result(request_uuid: str):
 @af_requests_bp.route("/", methods=["GET"])
 def list():
     """Create request object based on body params"""
-
+    print(request.args)
     query_params = api_models.AnalysisRequestListQueryParameters(**request.args)
 
     analyses, total_count = service.query(query_params)
