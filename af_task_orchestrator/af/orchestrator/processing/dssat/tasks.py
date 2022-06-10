@@ -77,7 +77,7 @@ def get_DSSAT_output_file(file, request_id):
 
     path_to_output_files = os.path.join(output_folder, request_id)
 
-    if(file == 'summary'):
+    if (file == 'summary'):
         summary_file = path_to_output_files + '/Summary.OUT'
 
         df = pd.read_csv(summary_file, skiprows=3, sep=r"\s+", index_col=False, engine='python')
@@ -87,28 +87,73 @@ def get_DSSAT_output_file(file, request_id):
         df = df.drop('EPCP', 1)
         df.columns = cols
         df.columns = df.columns.str.replace('.', '')
-    
-    if(file =='plantgro'): #this method works as well for Weather.OUT files
+        output = json.dumps(df.to_dict(orient='list'))
+
+    if (file == 'summary_mean'):
+        summary_file = path_to_output_files + '/Summary.OUT'
+
+        df = pd.read_csv(summary_file, skiprows=3, sep=r"\s+", index_col=False, engine='python')
+
+        # funky way to get rid of @ from header
+        cols = df.columns[1:]
+        df = df.drop('EPCP', 1)
+        df.columns = cols
+        df.columns = df.columns.str.replace('.', '')
+        exp_name = df.groupby('TRNO')['TNAM'].first()
+        mean_yield = df.groupby('TRNO')['HWAM'].first()
+        mean_precp = df.groupby('TRNO')['PRCP'].first()
+        mean_max_temp = df.groupby('TRNO')['TMAXA'].first()
+        mean_min_temp = df.groupby('TRNO')['TMINA'].first()
+        mean_srad = df.groupby('TRNO')['SRADA'].first()
+
+        final_df = pd.concat([exp_name, mean_yield, mean_precp,
+                          mean_max_temp, mean_min_temp, mean_srad], axis=1)
+
+        output = final_df.to_json(orient='records')
+
+    if (file == 'plantgro'):  # this method works as well for Weather.OUT files
         plantgro_file = path_to_output_files + '/PlantGro.OUT'
         df_list = []
-        count = 1 #for adding a new column that referes to the treatment number
+        count = 1  # for adding a new column that referes to the treatment number
         with open(plantgro_file, 'r+') as myfile:
             for myline in myfile:
                 if '@YEAR' in myline:
-                    bd = pd.DataFrame(columns = myline.split()) #get title
+                    bd = pd.DataFrame(columns=myline.split())  # get title
                     for myline in myfile:
-                        if len(myline.strip()) == 0: #skip to the next if there is no more row for the treatment
+                        if len(myline.strip()) == 0:  # skip to the next if there is no more row for the treatment
                             break
-                        bd.loc[len(bd)] = myline.split() #append rows to the dataframe
+                        bd.loc[len(bd)] = myline.split()  # append rows to the dataframe
                     bd['TRT'] = count
                     count = count + 1
                     df_list.append(bd)
 
-        #print(df_list)
+        # print(df_list)
         df = pd.concat(df_list, ignore_index=True)
-        #print(df)
+        # print(df)
+        output = json.dumps(df.to_dict(orient='list'))
 
-    output = json.dumps(df.to_dict(orient='list'))
+    if (file == 'data'):
+        data_cde_file = '/Users/thiagoferreira53/DSSAT48/DATA.CDE'
+        df_list = []
+        with open(data_cde_file, 'r+', encoding='cp1252') as myfile:
+            for myline in myfile:
+                if '@CDE' in myline:
+                    bd = pd.DataFrame(columns=myline.split())  # get title
+                    bd.columns = bd.columns.str.replace('.', '')
+                    for myline in myfile:
+                        col1 = myline[0:6].strip()
+                        col2 = myline[7:22].strip()
+                        col3 = myline[23:78].strip()
+                        col4 = myline[80:105].strip()
+                        if len(myline.strip()) == 0:  # skip to the next if there is no more row for the treatment
+                            break
+                        bd.loc[len(bd)] = [col1, col2, col3, col4]  # append rows to the dataframe
+                    df_list.append(bd)
+
+        print(df_list)
+        df = pd.concat(df_list, ignore_index=True)
+        # print(df)
+        output = json.dumps(df.to_dict(orient='list'))
 
     return output
 
